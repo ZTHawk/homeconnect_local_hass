@@ -103,5 +103,7 @@ class HCEntity(CoordinatorEntity[HomeConnectCoordinator], Entity):
     async def callback(self, _: HcEntity) -> None:
         if not self._has_callback:
             self._has_callback = True
-            self.async_write_ha_state()
-            self._has_callback = False
+            try:
+                self.async_write_ha_state()
+            finally:
+                self._has_callback = False

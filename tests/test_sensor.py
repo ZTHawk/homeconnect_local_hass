@@ -12,11 +12,13 @@ from custom_components.homeconnect_ws.entity_descriptions.descriptions_definitio
 from custom_components.homeconnect_ws.sensor import HCActiveProgram, HCSensor, HCWiFI
 from homeassistant.components.sensor import ATTR_OPTIONS
 from homeassistant.const import ATTR_FRIENDLY_NAME
+from homeassistant.helpers.entity import Entity as HAEntity
 
 from . import setup_config_entry
 from .const import MOCK_CONFIG_DATA
 
 if TYPE_CHECKING:
+    import pytest
     from home_disconnect.testutils import MockAppliance
     from homeassistant.core import HomeAssistant
 
@@ -72,6 +74,51 @@ async def test_update(
 
     state = hass.states.get(entity_id)
     assert state.state == "5"
+
+
+async def test_callback_recovers_after_write_failure(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    A single failed state write must not permanently freeze future updates.
+
+    Confirmed live on fork issue #7: sensor.<device>_power_state got stuck
+    on one value forever after some update. Traced to HCEntity.callback's
+    reentrancy guard (_has_callback) never being cleared if
+    async_write_ha_state() raised (e.g. HA core's own ENUM sensor
+    validation raises ValueError for an out-of-options value) - the guard
+    stayed True forever, silently no-opping every future callback for that
+    entity.
+    """
+    entity_id = "sensor.fake_brand_homeappliance_sensor"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+
+    original_write_ha_state = HAEntity.async_write_ha_state
+    should_raise = True
+
+    def patched_write_ha_state(self: HAEntity) -> None:
+        nonlocal should_raise
+        if self.entity_id == entity_id and should_raise:
+            should_raise = False
+            msg = "Simulated state-write failure"
+            raise ValueError(msg)
+        original_write_ha_state(self)
+
+    monkeypatch.setattr(HAEntity, "async_write_ha_state", patched_write_ha_state)
+
+    await mock_appliance.entities["Test.Sensor"].update({"value": 1})
+    await hass.async_block_till_done()
+
+    # The failed write shouldn't have left the reentrancy guard stuck -
+    # a later, successful update must still go through.
+    await mock_appliance.entities["Test.Sensor"].update({"value": 2})
+    await hass.async_block_till_done()
+
+    state = hass.states.get(entity_id)
+    assert state.state == "2"
 
 
 async def test_update_enum(
