@@ -8,6 +8,7 @@ from unittest.mock import Mock
 from custom_components.homeconnect_ws import entity_descriptions
 from custom_components.homeconnect_ws.entity_descriptions import (
     HCBinarySensorEntityDescription,
+    HCLightEntityDescription,
     HCSelectEntityDescription,
     HCSensorEntityDescription,
     HCSwitchEntityDescription,
@@ -16,6 +17,7 @@ from custom_components.homeconnect_ws.entity_descriptions.common import (
     generate_power_switch,
     generate_program,
 )
+from custom_components.homeconnect_ws.entity_descriptions.cooking import generate_hood_light
 from custom_components.homeconnect_ws.helpers import merge_dicts
 from home_disconnect.entities import Access, DeviceDescription, EntityDescription
 from homeassistant.components.sensor import SensorDeviceClass
@@ -166,6 +168,61 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
     switch_description = generate_power_switch(appliance)
 
     assert switch_description["select"][0].force_option_when_expected_offline is None
+
+
+HOOD_LIGHT = {
+    "setting": [
+        {
+            "access": "readwrite",
+            "available": True,
+            "uid": 700,
+            "name": "Cooking.Common.Setting.Lighting",
+        },
+        {
+            "access": "readwrite",
+            "available": True,
+            "uid": 701,
+            "name": "Cooking.Common.Setting.LightingBrightness",
+        },
+        {
+            "access": "readwrite",
+            "available": False,
+            "uid": 702,
+            "name": "Cooking.Hood.Setting.ColorTemperaturePercent",
+        },
+    ]
+}
+
+
+async def test_hood_light(mock_homeconnect_appliance: MockApplianceType) -> None:
+    """
+    A declared-but-unavailable ColorTemperaturePercent shouldn't be used.
+
+    Confirmed live on fork issue #15 (Bosch DWK91LT60): the appliance
+    declares ColorTemperaturePercent in its profile but marks it
+    unavailable - checking membership alone picked that branch anyway,
+    referencing an unavailable entity and making the whole light report
+    Unavailable even though on/off + brightness control works fine.
+    """
+    appliance = await mock_homeconnect_appliance(description=HOOD_LIGHT)
+
+    assert generate_hood_light(appliance) == HCLightEntityDescription(
+        key="light_cooking_lighting",
+        entity="Cooking.Common.Setting.Lighting",
+        brightness_entity="Cooking.Common.Setting.LightingBrightness",
+    )
+
+    # Once the appliance actually reports it available, the color
+    # temperature branch should be used.
+    await appliance.entities["Cooking.Hood.Setting.ColorTemperaturePercent"].update(
+        {"available": True}
+    )
+    assert generate_hood_light(appliance) == HCLightEntityDescription(
+        key="light_cooking_lighting",
+        entity="Cooking.Common.Setting.Lighting",
+        brightness_entity="Cooking.Common.Setting.LightingBrightness",
+        color_temperature_entity="Cooking.Hood.Setting.ColorTemperaturePercent",
+    )
 
 
 PROGRAM = DeviceDescription(

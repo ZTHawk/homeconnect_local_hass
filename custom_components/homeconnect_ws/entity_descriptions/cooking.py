@@ -383,7 +383,16 @@ def generate_hob_zones(appliance: HomeAppliance) -> EntityDescriptions:
 
 def generate_hood_light(appliance: HomeAppliance) -> HCLightEntityDescription | None:
     """Get Hood light descriptions."""
-    if "Cooking.Hood.Setting.ColorTemperaturePercent" in appliance.entities:
+    # Some hoods declare ColorTemperaturePercent/LightingBrightness in their
+    # profile but mark them unavailable (confirmed live on fork issue #15,
+    # Bosch DWK91LT60) - checking membership alone picked the wrong branch
+    # and referenced an unavailable entity, making the whole light entity
+    # report Unavailable even though the plain on/off Lighting control works
+    # fine on its own.
+    color_temperature_entity = appliance.entities.get(
+        "Cooking.Hood.Setting.ColorTemperaturePercent"
+    )
+    if getattr(color_temperature_entity, "available", False):
         return HCLightEntityDescription(
             key="light_cooking_lighting",
             entity="Cooking.Common.Setting.Lighting",
@@ -391,9 +400,10 @@ def generate_hood_light(appliance: HomeAppliance) -> HCLightEntityDescription | 
             color_temperature_entity="Cooking.Hood.Setting.ColorTemperaturePercent",
         )
 
-    if (
-        "Cooking.Hood.Setting.LightingBrightness" in appliance.entities
-        or "Cooking.Common.Setting.LightingBrightness" in appliance.entities
+    hood_brightness_entity = appliance.entities.get("Cooking.Hood.Setting.LightingBrightness")
+    common_brightness_entity = appliance.entities.get("Cooking.Common.Setting.LightingBrightness")
+    if getattr(hood_brightness_entity, "available", False) or getattr(
+        common_brightness_entity, "available", False
     ):
         return HCLightEntityDescription(
             key="light_cooking_lighting",
@@ -401,7 +411,9 @@ def generate_hood_light(appliance: HomeAppliance) -> HCLightEntityDescription | 
             brightness_entity="Cooking.Common.Setting.LightingBrightness",
         )
 
-    if "Cooking.Common.Setting.Lighting" in appliance.entities:
+    if getattr(
+        appliance.entities.get("Cooking.Common.Setting.Lighting"), "available", False
+    ):
         return HCLightEntityDescription(
             key="light_cooking_lighting",
             entity="Cooking.Common.Setting.Lighting",
