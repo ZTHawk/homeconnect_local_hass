@@ -391,7 +391,7 @@ If Home Assistant cannot connect to your appliance (during setup) despite correc
 
 This integration has built in measures (measures not fully tested yet) to prevent a websocket shutdown, however unexpectedly shutting down Home Assistant bypasses these measures. If enough unexpected shutdowns of Home Assistant happen, then Home Assistant will leave half-dead sessions that overload the device's session capacity, leading to a websocket shutdown.
 
-Confirmed error of a websocket shutdown seen so far (there may be others):
+Confirmed errors of a websocket shutdown seen so far (there may be others):
 - A plain HTTP 404 on the WebSocket upgrade (`aiohttp.WSServerHandshakeError`) where the appliance's HTTP layer responds normally but rejects the upgrade itself. The cause is understood (unexpected Home Assistant shutdowns leaving half-dead sessions, as described above), and this integration already has a fix/mitigation for it.
 - A TLS handshake reset, which this integration classifies as an authentication failure (`home_disconnect.errors.AuthenticationError`), is a confirmed cause of a shutdown on a washer/dryer combo. The actual cause of this one is still unknown, all that's confirmed is that a power cycle resolves it, not why it happens in the first place. Note that this same exception can also mean a wrong or outdated encryption key, not a websocket shutdown, so before you try the methods below, try deleting the config entry and putiing in a new entry since it would force a new encryption key.
 
