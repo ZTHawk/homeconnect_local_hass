@@ -157,6 +157,40 @@ async def test_update_brightness(
     assert state.attributes[ATTR_BRIGHTNESS] == 8  # 3%
 
 
+async def test_available_when_brightness_unavailable(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+) -> None:
+    """
+    On/off stays usable even if a secondary capability isn't currently readable.
+
+    Confirmed live on fork issue #15 (Bosch DWK91LT60): brightness is only
+    reported available while the light itself is on, so gating the whole
+    entity's availability on it created a deadlock - the light couldn't be
+    turned on because it was unavailable, and it was unavailable because
+    brightness (which only becomes available once on) wasn't set yet.
+    """
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.Lighting"].update({"value": False})
+    await mock_appliance.entities["Test.LightingBrightness"].update({"available": False})
+    await hass.async_block_till_done()
+
+    state = hass.states.get("light.fake_brand_homeappliance_light_2")
+    assert state.state == STATE_OFF
+    assert state.attributes[ATTR_BRIGHTNESS] is None
+
+    await mock_appliance.entities["Test.Lighting"].update({"value": True})
+    await mock_appliance.entities["Test.LightingBrightness"].update(
+        {"available": True, "value": 100}
+    )
+    await hass.async_block_till_done()
+
+    state = hass.states.get("light.fake_brand_homeappliance_light_2")
+    assert state.state == STATE_ON
+    assert state.attributes[ATTR_BRIGHTNESS] == 255
+
+
 async def test_set_brightness(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
