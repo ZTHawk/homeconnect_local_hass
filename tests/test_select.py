@@ -244,7 +244,10 @@ async def test_start_only_program_available_with_read_only_selected_program(
         Message(
             resource="/ro/activeProgram",
             action=Action.POST,
-            data={"program": 501, "options": []},
+            data={
+                "program": 501,
+                "options": [{"uid": 401, "value": None}, {"uid": 402, "value": None}],
+            },
         )
     )
 
@@ -297,7 +300,46 @@ async def test_select_program(
             action=Action.POST,
             data={
                 "program": 502,
-                "options": [],
+                "options": [{"uid": 401, "value": None}, {"uid": 402, "value": None}],
+            },
+        )
+    )
+
+
+async def test_start_only_program_sends_known_option_values(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+) -> None:
+    """
+    Starting a start-only program includes its options' already-known values.
+
+    Confirmed live on fork issue #14: a hood's Venting program requires a
+    real level to be sent - blanking out every option unconditionally (the
+    prior behavior) made the appliance reject the start with a 400, even
+    though the level's current value was already known.
+    """
+    entity_id = "select.fake_brand_homeappliance_selectedprogram"
+    await mock_appliance.entities["Test.Option1"].update({"value": 1})
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+
+    await hass.services.async_call(
+        SELECT_DOMAIN,
+        SERVICE_SELECT_OPTION,
+        {
+            ATTR_ENTITY_ID: entity_id,
+            ATTR_OPTION: "test_program_program3",
+        },
+        blocking=True,
+    )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/activeProgram",
+            action=Action.POST,
+            data={
+                "program": 502,
+                "options": [{"uid": 401, "value": 1}, {"uid": 402, "value": None}],
             },
         )
     )

@@ -184,7 +184,4 @@ class HCProgram(HCSelect):
         if selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
             await selected_program.select()
         elif selected_program.execution == Execution.START_ONLY:
-            # Avoid sending uninitialized option shadow values for start-only
-            # programs that were never selected first - let the appliance
-            # use its own defaults instead.
-            await selected_program.start(override_options=True)
+            await selected_program.start()
