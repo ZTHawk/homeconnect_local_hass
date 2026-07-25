@@ -216,10 +216,10 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
 
             await self.appliance.close()
 
-        msg = (
-            f"Can't connect to {self.config_entry.data[CONF_HOST]} - see "
-            f"{TROUBLESHOOTING_URL} if this doesn't resolve on its own"
-        )
+        msg = f"Can't connect to {self.config_entry.data[CONF_HOST]}"
+        if last_err is not None:
+            msg += f" ({type(last_err).__name__}: {last_err})"
+        msg += f" - see {TROUBLESHOOTING_URL} if this doesn't resolve on its own"
         raise ConfigEntryNotReady(msg) from last_err
 
     async def _connect(self) -> None:
