@@ -104,6 +104,49 @@ async def test_setup_entry_washer_connect_failure_is_non_blocking(
     await hass.config_entries.async_unload(entry.entry_id)
 
 
+async def test_washer_background_connect_does_not_block_till_done(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    async_block_till_done() must not wait on the exempt-type connect loop.
+
+    Confirmed live on fork issue #16: using async_create_task() for this
+    background loop meant it was tracked and waited on by Home Assistant's
+    own startup sequencing, blocking the rest of HA's bootstrap for minutes
+    whenever a washer/dryer was unreachable at startup - the loop retries
+    with backoff for as long as the appliance stays off. Switched to
+    async_create_background_task(), which is documented not to block
+    startup and not be waited on by async_block_till_done().
+    """
+    description = deepcopy(DEVICE_DESCRIPTION)
+    description["info"]["type"] = "Washer"
+    appliance = MockAppliance(description, "host", "mock_app", "mock_app_id", "PSK_KEY")
+    appliance.session.connect = AsyncMock(side_effect=ConnectionFailedError)
+    appliance_mock = Mock(return_value=appliance)
+    monkeypatch.setattr(coordinator, "HomeAppliance", appliance_mock)
+
+    config_data = deepcopy(MOCK_CONFIG_DATA)
+    config_data[CONF_DESCRIPTION] = description
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=config_data,
+        unique_id=MOCK_TLS_DEVICE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(entry.entry_id)
+    assert entry.state is ConfigEntryState.LOADED
+
+    # The connect loop is still retrying in the background (the mock always
+    # fails) - if it were still tracked by async_create_task(), this would
+    # hang for the loop's full backoff schedule instead of returning almost
+    # immediately.
+    await asyncio.wait_for(hass.async_block_till_done(), timeout=2)
+
+    await hass.config_entries.async_unload(entry.entry_id)
+
+
 async def test_setup_entry_non_laundry_connect_failure_not_ready(
     hass: HomeAssistant,
     monkeypatch: pytest.MonkeyPatch,

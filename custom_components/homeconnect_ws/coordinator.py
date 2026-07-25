@@ -180,8 +180,16 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
             # Being unreachable at setup is expected for these (see
             # EXPECTED_OFFLINE_APPLIANCE_TYPES), so we don't want a temporarily
             # powered-off appliance to prevent its entities from being created
-            # at all.
-            self.config_entry.async_create_task(self.hass, self._connect())
+            # at all. async_create_task() would still be tracked and waited on
+            # by HA's own startup sequencing, which defeats the point - a
+            # washer that's been off since before HA started could keep
+            # _connect() retrying for a long time, blocking the rest of HA's
+            # bootstrap for minutes (confirmed live on fork issue #16).
+            # async_create_background_task() is explicitly documented not to
+            # block startup or be waited on by async_block_till_done().
+            self.config_entry.async_create_background_task(
+                self.hass, self._connect(), "homeconnect_ws laundry connect"
+            )
             # _connect() above only covers the *first* connection - it returns
             # for good once that succeeds. reconect=False (see __init__) means
             # home-disconnect won't auto-reconnect after a *later* drop either,
@@ -326,7 +334,11 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         """
         if self._escalate_connectivity_logging or self.connected:
             return
-        self.config_entry.async_create_task(self.hass, self._async_poll_reconnect(dt_util.utcnow()))
+        self.config_entry.async_create_background_task(
+            self.hass,
+            self._async_poll_reconnect(dt_util.utcnow()),
+            "homeconnect_ws nudge reconnect",
+        )
 
     async def _async_update_data(self) -> None:
         return None
