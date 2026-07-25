@@ -109,6 +109,7 @@ async def test_setup_entry_non_laundry_connect_failure_not_ready(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Non-laundry appliances raise ConfigEntryNotReady if unreachable at setup."""
+    monkeypatch.setattr(coordinator, "SETUP_CONNECT_RETRY_DELAY", 0)
     appliance = MockAppliance(DEVICE_DESCRIPTION, "host", "mock_app", "mock_app_id", "PSK_KEY")
     appliance.session.connect = AsyncMock(side_effect=ConnectionFailedError)
     appliance_mock = Mock(return_value=appliance)
@@ -125,6 +126,33 @@ async def test_setup_entry_non_laundry_connect_failure_not_ready(
     await hass.async_block_till_done()
 
     assert entry.state is ConfigEntryState.SETUP_RETRY
+    # Every attempt was exhausted, not just one, before giving up.
+    assert appliance.session.connect.await_count == coordinator.SETUP_CONNECT_ATTEMPTS
+
+
+async def test_setup_entry_non_laundry_retries_transient_connect_failure(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A single momentary connect failure at setup is retried, not fatal on its own."""
+    monkeypatch.setattr(coordinator, "SETUP_CONNECT_RETRY_DELAY", 0)
+    appliance = MockAppliance(DEVICE_DESCRIPTION, "host", "mock_app", "mock_app_id", "PSK_KEY")
+    appliance.session.connect = AsyncMock(side_effect=[ConnectionFailedError, None])
+    appliance_mock = Mock(return_value=appliance)
+    monkeypatch.setattr(coordinator, "HomeAppliance", appliance_mock)
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=MOCK_CONFIG_DATA,
+        unique_id=MOCK_TLS_DEVICE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert entry.state is ConfigEntryState.LOADED
+    assert appliance.session.connect.await_count == 2
 
 
 async def test_washer_reconnect_poll_registered_and_recovers(

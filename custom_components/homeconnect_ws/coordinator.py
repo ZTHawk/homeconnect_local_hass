@@ -43,6 +43,19 @@ _LOGGER = logging.getLogger(__name__)
 CONNECT_RETRY_INITIAL_DELAY = 5  # seconds
 CONNECT_RETRY_MAX_DELAY = 60  # seconds
 
+# Non-exempt appliance types block setup on a single successful connection
+# (see test-before-setup in quality_scale.yaml), but a bare single attempt
+# turned out to be too fragile: a momentary connection hiccup (e.g. a
+# ConnectionResetError mid-handshake, confirmed live on fork issue #9 for a
+# WasherDryer combo that was otherwise fully reachable) failed the whole
+# config entry instead of just that one attempt, something 1.6.0's always-
+# retrying background setup never did for any appliance type. A couple of
+# quick attempts smooths over that class of blip without meaningfully
+# delaying the case where the appliance really is unreachable - HA's own
+# ConfigEntryNotReady backoff still takes over after this gives up.
+SETUP_CONNECT_ATTEMPTS = 2
+SETUP_CONNECT_RETRY_DELAY = 3  # seconds
+
 # Standalone washers/dryers disable home-disconnect's own auto-reconnect (see
 # reconect=False below) - this is the fallback that takes its place. Fixed,
 # not exponential: unlike a connect failure at startup, we have no evidence
@@ -171,20 +184,30 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         self.logger.debug(
             "Connecting to %s", self.config_entry.data[CONF_DESCRIPTION]["info"].get("vib")
         )
-        try:
-            await self.appliance.connect()
-        except Exception as err:
-            await self.appliance.close()
-            msg = f"Can't connect to {self.config_entry.data[CONF_HOST]}"
-            raise ConfigEntryNotReady(msg) from err
+        last_err: Exception | None = None
+        for attempt in range(SETUP_CONNECT_ATTEMPTS):
+            if attempt:
+                # A momentary connection hiccup (e.g. a reset mid-handshake)
+                # shouldn't fail the whole config entry by itself - give the
+                # appliance one more quick chance before falling back to HA's
+                # own, much slower, ConfigEntryNotReady retry loop.
+                await asyncio.sleep(SETUP_CONNECT_RETRY_DELAY)
+            try:
+                await self.appliance.connect()
+            except Exception as err:  # noqa: BLE001 - retried, then re-raised below
+                await self.appliance.close()
+                last_err = err
+                continue
 
-        if not self.appliance.session.connected:
-            await self.appliance.close()
-            msg = f"Can't connect to {self.config_entry.data[CONF_HOST]}"
-            raise ConfigEntryNotReady(msg)
+            if self.appliance.session.connected:
+                self.connected = True
+                self.async_set_updated_data(None)
+                return
 
-        self.connected = True
-        self.async_set_updated_data(None)
+            await self.appliance.close()
+
+        msg = f"Can't connect to {self.config_entry.data[CONF_HOST]}"
+        raise ConfigEntryNotReady(msg) from last_err
 
     async def _connect(self) -> None:
         self.logger.debug(
