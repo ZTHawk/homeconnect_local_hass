@@ -40,6 +40,16 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+# A sustained "Can't connect" failure has more than one real cause (a stale/
+# wrong encryption key, a genuinely offline appliance, or a stuck local API
+# needing a power cycle - see the README's "websocket shutdown" section) -
+# not something a single log line can diagnose, so point at the doc instead
+# of guessing which one it is.
+TROUBLESHOOTING_URL = (
+    "https://github.com/vemboy200/homeconnect_local_hass"
+    "#home-assistant-cannot-connect-to-my-appliance-what-should-i-do"
+)
+
 CONNECT_RETRY_INITIAL_DELAY = 5  # seconds
 CONNECT_RETRY_MAX_DELAY = 60  # seconds
 
@@ -206,7 +216,10 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
 
             await self.appliance.close()
 
-        msg = f"Can't connect to {self.config_entry.data[CONF_HOST]}"
+        msg = (
+            f"Can't connect to {self.config_entry.data[CONF_HOST]} - see "
+            f"{TROUBLESHOOTING_URL} if this doesn't resolve on its own"
+        )
         raise ConfigEntryNotReady(msg) from last_err
 
     async def _connect(self) -> None:
