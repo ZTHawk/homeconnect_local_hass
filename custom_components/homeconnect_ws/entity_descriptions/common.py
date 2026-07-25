@@ -47,6 +47,12 @@ POWER_SWITCH_VALUE_MAPINGS = (
     ("Standby", "Off"),
 )
 
+# BSH appliances name their powered-down PowerState value either "Off" or
+# "MainsOff" depending on the model (see POWER_SWITCH_VALUE_MAPINGS above,
+# which already accounts for both). Checked in this order so "Off" wins if
+# an appliance's enum somehow had both.
+POWER_OFF_STATE_NAMES = ("Off", "MainsOff")
+
 
 def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription | None:
     """Get Start Button description."""
@@ -95,6 +101,15 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
                         )
                     ]
 
+        # "off" is only a valid option if this appliance's PowerState is
+        # actually settable to Off/MainsOff - forcing to a name that isn't
+        # one of its real options makes SelectEntity.state fall back to
+        # None (shown as "Unknown"), confirmed live on fork issue #7.
+        force_off_option = next(
+            (name.lower() for name in POWER_OFF_STATE_NAMES if name in settable_states),
+            None,
+        )
+
         entity_descriptions["select"] = [
             HCSelectEntityDescription(
                 key="select_power_state",
@@ -103,7 +118,7 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
                 has_state_translation=True,
                 # more then two power states
                 entity_registry_enabled_default=len(settable_states) > 2,
-                force_option_when_expected_offline="off",
+                force_option_when_expected_offline=force_off_option,
             )
         ]
     return entity_descriptions
