@@ -128,8 +128,17 @@
       "switch_oven_light_during_operation": {
         "name": "Подсветка духовки во время работы"
       },
+      "switch_oven_night_dimout": {
+        "name": "Night dimout"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Режим Шаббат"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Телескопический выдвижной механизм"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Отобразить логотип бренда"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Режим Шаббат"
@@ -1666,6 +1675,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Яркость дисплея"
+      },
+      "number_oven_sound_volume": {
+        "name": "Громкость звука"
       },
       "number_hood_interval_off": {
         "name": "Время интервала выключения"

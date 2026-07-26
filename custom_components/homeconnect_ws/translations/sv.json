@@ -176,8 +176,17 @@
       "switch_oven_light_during_operation": {
         "name": "Ugnsljus under drift"
       },
+      "switch_oven_night_dimout": {
+        "name": "Night dimout"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Sabbatsläge"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Teleskopisk utdragbar enhet"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Visa varumärkeslogotyp"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbatsläge"
@@ -1804,6 +1813,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Display – ljusstyrka"
+      },
+      "number_oven_sound_volume": {
+        "name": "Ljudvolym"
       },
       "number_hood_interval_off": {
         "name": "Intervall – av"

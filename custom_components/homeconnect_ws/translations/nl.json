@@ -131,8 +131,17 @@
       "switch_oven_light_during_operation": {
         "name": "Verlichting tijdens werking"
       },
+      "switch_oven_night_dimout": {
+        "name": "Night dimout"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Sabbat modus"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Telescopisch uitschuifbaar"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Merklogo weergeven"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbat modus"
@@ -2011,6 +2020,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Helderheid display"
+      },
+      "number_oven_sound_volume": {
+        "name": "Geluidsvolume"
       },
       "number_hood_interval_off": {
         "name": "Tijdsinterval uitschakelen"

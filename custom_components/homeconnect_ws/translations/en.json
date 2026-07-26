@@ -234,8 +234,17 @@
       "switch_oven_light_during_operation": {
         "name": "Oven Light during Operation"
       },
+      "switch_oven_night_dimout": {
+        "name": "Night dimout"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Sabbath mode"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Teloscopic slide out"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Display brand logo"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbath mode"
@@ -3676,6 +3685,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Display brightness"
+      },
+      "number_oven_sound_volume": {
+        "name": "Sound volume"
       },
       "number_hood_interval_off": {
         "name": "Interval time off"
