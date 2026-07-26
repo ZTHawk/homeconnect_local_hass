@@ -119,6 +119,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
         force_off_when_expected_offline=True,
     )
     assert switch_description["select"][0].force_option_when_expected_offline == "off"
+    assert switch_description["sensor"][0].force_option_when_expected_offline == "off"
 
     # No Switch
     device_description["setting"][0]["min"] = 0
@@ -128,6 +129,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
 
     assert "switch" not in switch_description
     assert switch_description["select"][0].force_option_when_expected_offline == "off"
+    assert switch_description["sensor"][0].force_option_when_expected_offline == "off"
 
     # On/MainsOff Switch - "Off" isn't one of this appliance's power states at
     # all, only "MainsOff" is, so forcing to "off" would return an option
@@ -145,6 +147,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
         force_off_when_expected_offline=True,
     )
     assert switch_description["select"][0].force_option_when_expected_offline == "mainsoff"
+    assert switch_description["sensor"][0].force_option_when_expected_offline == "mainsoff"
 
     # Standby/Off Switch
     device_description["setting"][0]["enumeration"] = {"1": "Off", "3": "Standby"}
@@ -159,6 +162,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
         force_off_when_expected_offline=True,
     )
     assert switch_description["select"][0].force_option_when_expected_offline == "off"
+    assert switch_description["sensor"][0].force_option_when_expected_offline == "off"
 
     # Neither "Off" nor "MainsOff" is a valid state for this appliance at all -
     # nothing to force to, so it should fall back to None rather than an
@@ -168,6 +172,7 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
     switch_description = generate_power_switch(appliance)
 
     assert switch_description["select"][0].force_option_when_expected_offline is None
+    assert switch_description["sensor"][0].force_option_when_expected_offline is None
 
 
 HOOD_LIGHT = {

@@ -121,6 +121,20 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
                 force_option_when_expected_offline=force_off_option,
             )
         ]
+
+        # Same race as the select above (BSH.Common.Setting.PowerState never gets
+        # a confirming update before a laundry appliance's clean disconnect), but
+        # for the read-only sensor mirror of power state - confirmed live on fork
+        # issue #7 as the sensor staying frozen on its last real value forever.
+        entity_descriptions["sensor"] = [
+            HCSensorEntityDescription(
+                key="sensor_power_state",
+                entity="BSH.Common.Setting.PowerState",
+                device_class=SensorDeviceClass.ENUM,
+                has_state_translation=True,
+                force_option_when_expected_offline=force_off_option,
+            )
+        ]
     return entity_descriptions
 
 
@@ -468,12 +482,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             has_state_translation=True,
         ),
         HCSensorEntityDescription(
-            key="sensor_power_state",
-            entity="BSH.Common.Setting.PowerState",
-            device_class=SensorDeviceClass.ENUM,
-            has_state_translation=True,
-        ),
-        HCSensorEntityDescription(
             key="sensor_flex_start",
             entity="BSH.Common.Status.FlexStart",
             device_class=SensorDeviceClass.ENUM,
@@ -485,6 +493,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SensorDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             suggested_unit_of_measurement=UnitOfTime.HOURS,
+            clear_on_expected_offline=True,
         ),
         generate_door_state,
     ],
@@ -524,6 +533,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=NumberDeviceClass.DURATION,
             native_unit_of_measurement=UnitOfTime.SECONDS,
             mode=NumberMode.AUTO,
+            clear_on_expected_offline=True,
         ),
         HCNumberEntityDescription(
             key="number_start_in",

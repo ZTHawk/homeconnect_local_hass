@@ -249,7 +249,7 @@ Program options including temperature, spin speed, prewash, rinse plus, gentle c
 
 ### Oven / Hob / Hood
 
-Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital); hood fan speed control, ambient and work lighting, automatic shutoff delay, interval ventilation, grease and carbon filter saturation sensors and one-tap reset buttons; hob ventilation level.
+Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital), night-time display dimming, sound volume, telescopic slide-out rail, and brand logo display; hood fan speed control, ambient and work lighting, automatic shutoff delay, interval ventilation, grease and carbon filter saturation sensors and one-tap reset buttons; hob ventilation level.
 
 ### Coffee Maker
 

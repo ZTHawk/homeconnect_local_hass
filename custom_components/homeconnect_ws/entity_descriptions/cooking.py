@@ -411,9 +411,7 @@ def generate_hood_light(appliance: HomeAppliance) -> HCLightEntityDescription | 
             brightness_entity="Cooking.Common.Setting.LightingBrightness",
         )
 
-    if getattr(
-        appliance.entities.get("Cooking.Common.Setting.Lighting"), "available", False
-    ):
+    if getattr(appliance.entities.get("Cooking.Common.Setting.Lighting"), "available", False):
         return HCLightEntityDescription(
             key="light_cooking_lighting",
             entity="Cooking.Common.Setting.Lighting",
@@ -546,6 +544,12 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
+            key="number_oven_sound_volume",
+            entity="Cooking.Oven.Setting.SoundVolume",
+            entity_category=EntityCategory.CONFIG,
+            mode=NumberMode.AUTO,
+        ),
+        HCNumberEntityDescription(
             key="number_hood_interval_off",
             entity="Cooking.Hood.Setting.IntervalTimeOn",
             native_unit_of_measurement=UnitOfTime.SECONDS,
@@ -658,6 +662,12 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity_category=EntityCategory.CONFIG,
         ),
         HCSwitchEntityDescription(
+            key="switch_oven_night_dimout",
+            entity="Cooking.Oven.Setting.NightDimout",
+            device_class=SwitchDeviceClass.SWITCH,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSwitchEntityDescription(
             key="switch_oven_sabbath_mode",
             entity="Cooking.Oven.Setting.SabbathMode",
             device_class=SwitchDeviceClass.SWITCH,
@@ -673,6 +683,20 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCSwitchEntityDescription(
             key="switch_oven_display_standby_dimmed",
             entity="Cooking.Oven.Setting.DisplayStandbyDimmed",
+            device_class=SwitchDeviceClass.SWITCH,
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+        ),
+        HCSwitchEntityDescription(
+            key="switch_oven_teloscopic_slide_out_refited",
+            entity="Cooking.Oven.Setting.TeloscopicSlideOutRefited",
+            device_class=SwitchDeviceClass.SWITCH,
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+        ),
+        HCSwitchEntityDescription(
+            key="switch_oven_display_brand_logo",
+            entity="Cooking.Oven.Setting.DisplayBrandLogo",
             device_class=SwitchDeviceClass.SWITCH,
             entity_category=EntityCategory.CONFIG,
             entity_registry_enabled_default=False,
