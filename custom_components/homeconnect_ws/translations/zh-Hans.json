@@ -177,7 +177,7 @@
         "name": "运行时炉灯"
       },
       "switch_oven_night_dimout": {
-        "name": "Night dimout"
+        "name": "夜间调暗"
       },
       "switch_oven_sabbath_mode": {
         "name": "安息日模式"
