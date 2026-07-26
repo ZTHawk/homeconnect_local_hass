@@ -2038,6 +2038,8 @@
           "fanstage01": "1",
           "fanstage02": "2",
           "fanstage03": "3"
+        }
+      },
       "select_hood_boost": {
         "name": "Boost",
         "state": {
