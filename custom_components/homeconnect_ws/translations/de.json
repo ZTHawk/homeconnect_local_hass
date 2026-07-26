@@ -206,9 +206,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "Innenbeleuchtung Theatermodus"
       },
-      "switch_hood_boost": {
-        "name": "Boost-Stufe"
-      },
       "switch_hood_silence_mode": {
         "name": "Leisemodus"
       },
@@ -2585,6 +2582,25 @@
           "none": "Keine",
           "fahrenheit": "Standard-Kohlefilter",
           "regenerativecarbonfilter": "Regenerierbarer Kohlefilter"
+        }
+      },
+      "select_hood_boost": {
+        "name": "Boost-Stufe",
+        "state": {
+          "intensivestageoff": "Aus",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "Farbtemperaturmodus",
+        "state": {
+          "custom": "Benutzerdefiniert",
+          "warm": "Warm",
+          "warmtoneutral": "Warm bis neutral",
+          "neutral": "Neutral",
+          "neutraltocold": "Neutral bis kalt",
+          "cold": "Kalt"
         }
       }
     },

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
-from custom_components.homeconnect_ws import entity_descriptions
+from custom_components.homeconnect_ws import HCData, entity_descriptions
 from custom_components.homeconnect_ws.entity_descriptions import (
     HCBinarySensorEntityDescription,
     HCLightEntityDescription,
@@ -19,6 +19,7 @@ from custom_components.homeconnect_ws.entity_descriptions.common import (
 )
 from custom_components.homeconnect_ws.entity_descriptions.cooking import generate_hood_light
 from custom_components.homeconnect_ws.helpers import merge_dicts
+from custom_components.homeconnect_ws.select import HCSelect
 from home_disconnect.entities import Access, DeviceDescription, EntityDescription
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.switch import SwitchDeviceClass
@@ -298,3 +299,108 @@ async def test_program(mock_homeconnect_appliance: MockApplianceType) -> None:
     )
 
     appliance = await mock_homeconnect_appliance(description={})
+
+
+HOOD_BOOST = DeviceDescription(
+    info={"deviceID": "test_device_id"},
+    option=[
+        {
+            "access": "readwrite",
+            "available": True,
+            # Matches the real IntensiveStage enum from a hood's own
+            # FeatureMapping (confirmed live on fork issue #17) - a 3-way
+            # stage, not a boolean, which is why this is a select rather
+            # than a switch.
+            "enumeration": {
+                "0": "IntensiveStageOff",
+                "1": "IntensiveStage1",
+                "2": "IntensiveStage2",
+            },
+            "uid": 5000,
+            "name": "Cooking.Common.Option.Hood.Boost",
+        },
+    ],
+)
+
+
+async def test_hood_boost_is_a_three_stage_select(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """switch_hood_boost was replaced by select_hood_boost - a boolean can't represent 2 stages."""
+    appliance = await mock_homeconnect_appliance(description=HOOD_BOOST)
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=False),
+    )
+    entity_description = HCSelectEntityDescription(
+        key="select_hood_boost",
+        entity="Cooking.Common.Option.Hood.Boost",
+        has_state_translation=True,
+    )
+    entity = HCSelect(entity_description, runtime_data)
+
+    assert entity._attr_options == [
+        "intensivestageoff",
+        "intensivestage1",
+        "intensivestage2",
+    ]
+
+    await appliance.entities["Cooking.Common.Option.Hood.Boost"].update({"value": 2})
+    assert entity.current_option == "intensivestage2"
+
+
+HOOD_COLOR_TEMPERATURE = DeviceDescription(
+    info={"deviceID": "test_device_id"},
+    setting=[
+        {
+            "access": "readwrite",
+            "available": True,
+            # Matches the real ColorTemperature enum from a hood's own
+            # FeatureMapping (confirmed live on fork issue #15) - a mode
+            # selector, distinct from ColorTemperaturePercent's raw value.
+            "enumeration": {
+                "0": "custom",
+                "1": "warm",
+                "2": "warmToNeutral",
+                "3": "neutral",
+                "4": "neutralToCold",
+                "5": "cold",
+            },
+            "uid": 6000,
+            "name": "Cooking.Hood.Setting.ColorTemperature",
+        },
+    ],
+)
+
+
+async def test_hood_color_temperature_mode_select(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """select_hood_color_temperature_mode exposes the hood's warm/neutral/cold enum."""
+    appliance = await mock_homeconnect_appliance(description=HOOD_COLOR_TEMPERATURE)
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=False),
+    )
+    entity_description = HCSelectEntityDescription(
+        key="select_hood_color_temperature_mode",
+        entity="Cooking.Hood.Setting.ColorTemperature",
+        has_state_translation=True,
+    )
+    entity = HCSelect(entity_description, runtime_data)
+
+    assert entity._attr_options == [
+        "custom",
+        "warm",
+        "warmtoneutral",
+        "neutral",
+        "neutraltocold",
+        "cold",
+    ]
+
+    await appliance.entities["Cooking.Hood.Setting.ColorTemperature"].update({"value": 4})
+    assert entity.current_option == "neutraltocold"

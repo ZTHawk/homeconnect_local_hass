@@ -155,9 +155,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "Режим театральной подсветки"
       },
-      "switch_hood_boost": {
-        "name": "Турбо"
-      },
       "switch_hood_silence_mode": {
         "name": "Тихий режим"
       },
@@ -1696,6 +1693,25 @@
           "fanstage01": "1",
           "fanstage02": "2",
           "fanstage03": "3"
+        }
+      },
+      "select_hood_boost": {
+        "name": "Турбо",
+        "state": {
+          "intensivestageoff": "Выключено",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "Режим цветовой температуры",
+        "state": {
+          "custom": "Пользовательский",
+          "warm": "Тёплый",
+          "warmtoneutral": "От тёплого к нейтральному",
+          "neutral": "Нейтральный",
+          "neutraltocold": "От нейтрального к холодному",
+          "cold": "Холодный"
         }
       }
     },

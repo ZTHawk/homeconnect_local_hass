@@ -644,13 +644,8 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             has_state_translation=True,
             entity_category=EntityCategory.CONFIG,
         ),
-        # Disabled because setting value results in 'Error response from Appliance: ReadRequest NotAvailable'.
-        #HCSelectEntityDescription(
-        #    key="select_hob_power_level",
-        #    entity="Cooking.Hob.Option.PowerLevel",
-        #    has_state_translation=True,
-        #    entity_category=EntityCategory.CONFIG,
-        #),
+        # Cooking.Hob.Option.PowerLevel isn't exposed here - setting it
+        # returns 'Error response from Appliance: ReadRequest NotAvailable'.
         HCSelectEntityDescription(
             key="select_hob_hood_automatic_light_off",
             entity="Cooking.Hob.Setting.HoodAutomaticLightOff",
@@ -715,6 +710,17 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             has_state_translation=True,
             entity_category=EntityCategory.CONFIG,
         ),
+        HCSelectEntityDescription(
+            key="select_hood_color_temperature_mode",
+            entity="Cooking.Hood.Setting.ColorTemperature",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hood_boost",
+            entity="Cooking.Common.Option.Hood.Boost",
+            has_state_translation=True,
+        ),
     ],
     "switch": [
         HCSwitchEntityDescription(
@@ -773,11 +779,6 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SwitchDeviceClass.SWITCH,
             entity_category=EntityCategory.CONFIG,
             entity_registry_enabled_default=False,
-        ),
-        HCSwitchEntityDescription(
-            key="switch_hood_boost",
-            entity="Cooking.Common.Option.Hood.Boost",
-            device_class=SwitchDeviceClass.SWITCH,
         ),
         HCSwitchEntityDescription(
             key="switch_hood_silence_mode",

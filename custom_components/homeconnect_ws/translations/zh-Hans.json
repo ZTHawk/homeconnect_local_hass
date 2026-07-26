@@ -203,9 +203,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "剧场模式照明"
       },
-      "switch_hood_boost": {
-        "name": "增压"
-      },
       "switch_hood_silence_mode": {
         "name": "静音模式"
       },
@@ -1755,6 +1752,25 @@
         "state": {
           "none": "无",
           "regenerativecarbonfilter": "再生活性炭滤网"
+        }
+      },
+      "select_hood_boost": {
+        "name": "增压",
+        "state": {
+          "intensivestageoff": "关闭",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "色温模式",
+        "state": {
+          "custom": "自定义",
+          "warm": "暖光",
+          "warmtoneutral": "暖光至中性",
+          "neutral": "中性",
+          "neutraltocold": "中性至冷光",
+          "cold": "冷光"
         }
       }
     },
