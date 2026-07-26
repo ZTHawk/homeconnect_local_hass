@@ -203,9 +203,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "Invändigt ljus – bioläge"
       },
-      "switch_hood_boost": {
-        "name": "Boostläge"
-      },
       "switch_hood_silence_mode": {
         "name": "Tyst läge"
       },
@@ -1828,6 +1825,25 @@
           "fanstage01": "1",
           "fanstage02": "2",
           "fanstage03": "3"
+        }
+      },
+      "select_hood_boost": {
+        "name": "Boostläge",
+        "state": {
+          "intensivestageoff": "Av",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "Färgtemperaturläge",
+        "state": {
+          "custom": "Anpassad",
+          "warm": "Varm",
+          "warmtoneutral": "Varm till neutral",
+          "neutral": "Neutral",
+          "neutraltocold": "Neutral till kall",
+          "cold": "Kall"
         }
       }
     },

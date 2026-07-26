@@ -1,22 +1,23 @@
 name: Claude PR Review
 
-# Runs once automatically when a PR opens (including from forks - see the
-# pull_request_target note below). To ask for a fresh look after new commits,
-# a maintainer/collaborator can comment "@claude review" instead of it
-# re-running on every push - keeps subscription usage bounded and avoids
-# spamming the PR with a new comment on every commit.
+# DISABLED: every run (7 for 7, across multiple PRs and secret/token
+# regenerations) has failed at the OIDC-to-app-token exchange with "Invalid
+# OIDC token" from Anthropic's backend - not a stale secret or missing
+# GitHub App install (both were verified fine), so something is broken in
+# claude-code-action@v1's auth flow itself for this kind of token. Triggers
+# removed so it stops burning CI runs and posting failure statuses on every
+# PR; workflow_dispatch left in so it can still be run manually if this
+# ever gets revisited. See PRs #18 and #19 for the failure logs.
 #
-# SECURITY: pull_request_target runs with repo secrets available even for
-# fork PRs, unlike plain pull_request. That's only safe because this job
-# never checks out or executes the PR's actual code - it stays on the base
-# ref and reads the diff as inert text via `gh pr diff`/`gh pr view`. Do not
-# add a checkout of the PR head ref or run any command from the fork here.
+# SECURITY (kept for whenever this is re-enabled): pull_request_target runs
+# with repo secrets available even for fork PRs, unlike plain pull_request.
+# That's only safe because this job never checks out or executes the PR's
+# actual code - it stays on the base ref and reads the diff as inert text
+# via `gh pr diff`/`gh pr view`. Do not add a checkout of the PR head ref or
+# run any command from the fork here.
 
 on:
-  pull_request_target:
-    types: [opened]
-  issue_comment:
-    types: [created]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
