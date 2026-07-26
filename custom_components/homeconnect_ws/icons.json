@@ -393,7 +393,31 @@
             },
             "select_refrigerator_door_assistant_freezer_trigger": {
                 "default": "mdi:door"
-            }
+            },
+			"select_hob_automatic_keylock": {
+				"default": "mdi:lock-reset"
+			},
+			"select_hob_energy_consumption_indication": {
+				"default": "mdi:transmission-tower"
+			},
+			"select_hob_bridge_zone_mode": {
+				"default": "mdi:arrow-split-horizontal"
+			},
+			"select_hob_hood_automatic_light_off": {
+				"default": "mdi:lightbulb-auto-outline"
+			},
+			"select_hob_hood_automatic_light_on": {
+				"default": "mdi:lightbulb-auto"
+			},
+			"select_hob_hood_automatic_start": {
+				"default": "mdi:fan-auto"
+			},
+			"select_hob_hood_after_run": {
+				"default": "mdi:fan-off"
+			},
+			"select_hob_power_management": {
+				"default": "mdi:flash"
+			}
         },
         "button": {
             "button_abort_program": {
