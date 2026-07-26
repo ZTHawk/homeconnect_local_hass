@@ -173,8 +173,17 @@
       "switch_oven_light_during_operation": {
         "name": "Éclairage du four en fonctionnement"
       },
+      "switch_oven_night_dimout": {
+        "name": "Atténuation nocturne"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Mode Sabbath"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Extension télescopique"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Afficher le logo de la marque"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Mode Sabbath"
@@ -1867,6 +1876,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Luminosité de l'affichage"
+      },
+      "number_oven_sound_volume": {
+        "name": "Volume"
       },
       "number_hood_interval_off": {
         "name": "Interval time off"
