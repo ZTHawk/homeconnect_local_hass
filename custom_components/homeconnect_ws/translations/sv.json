@@ -1807,7 +1807,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Effekthantering"
+        "name": "Maximal effektförbrukning"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Signaltonsnivå",

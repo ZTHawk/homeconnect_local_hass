@@ -1453,7 +1453,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Gestione della potenza"
+        "name": "Potenza massima assorbita"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Livello segnale acustico",

@@ -1711,7 +1711,7 @@
         }
       },
       "select_hob_hood_after_run": {
-        "name": "Hood After Run",
+        "name": "烟机延时关机",
         "state": {
           "off": "关闭",
           "automaticmode": "自动的",
@@ -1720,7 +1720,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Power Management"
+        "name": "最大功耗"
       },
       "select_hob_buzzer_beep_level": {
         "name": "蜂鸣器提示音量级",

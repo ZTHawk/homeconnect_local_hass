@@ -3635,7 +3635,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Power Management"
+        "name": "Maximum power consumption"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Buzzer Beep Level",

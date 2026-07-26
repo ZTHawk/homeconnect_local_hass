@@ -2492,9 +2492,9 @@
         }
       },
       "select_hob_energy_consumption_indication": {
-        "name": "Energy Consumption Indication",
+        "name": "Energieverbrauchsanzeige",
         "state": {
-          "indicationoff": "Vergergen",
+          "indicationoff": "Verbergen",
           "indicationon": "Anzeigen"
         }
       },
@@ -2540,7 +2540,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Energieverbrauchsanzeige"
+        "name": "Maximale Leistungsaufnahme"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Signaltöne",

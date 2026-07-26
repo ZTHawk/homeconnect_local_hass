@@ -1984,7 +1984,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Vermogensbeheer"
+        "name": "Maximaal opgenomen vermogen"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Niveau van het geluidssignaal",

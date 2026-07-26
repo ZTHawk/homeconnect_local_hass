@@ -1675,7 +1675,7 @@
         }
       },
       "select_hob_power_management": {
-        "name": "Управление мощностью"
+        "name": "Максимальная потребляемая мощность"
       },
       "select_hob_buzzer_beep_level": {
         "name": "Уровень звукового сигнала",
