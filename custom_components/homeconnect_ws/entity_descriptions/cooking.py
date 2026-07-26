@@ -546,6 +546,12 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
+            key="number_hob_automatic_timer",
+            entity="Cooking.Hob.Setting.AutomaticTimer",
+            entity_category=EntityCategory.CONFIG,
+            mode=NumberMode.AUTO,
+        ),
+        HCNumberEntityDescription(
             key="number_hood_interval_off",
             entity="Cooking.Hood.Setting.IntervalTimeOn",
             native_unit_of_measurement=UnitOfTime.SECONDS,
@@ -617,9 +623,53 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity_category=EntityCategory.CONFIG,
         ),
         HCSelectEntityDescription(
-            key="select_hood_interval_stage",
-            entity="Cooking.Hood.Setting.IntervalStage",
+            key="select_hob_automatic_keylock",
+            entity="Cooking.Hob.Setting.AutomaticKeyLock",
             has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_bridge_zone_mode",
+            entity="Cooking.Hob.Setting.BridgeZoneMode",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_energy_consumption_indication",
+            entity="Cooking.Hob.Setting.EnergyConsumptionIndication",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        # Disabled because setting value results in 'Error response from Appliance: ReadRequest NotAvailable'.
+        #HCSelectEntityDescription(
+        #    key="select_hob_power_level",
+        #    entity="Cooking.Hob.Option.PowerLevel",
+        #    has_state_translation=True,
+        #    entity_category=EntityCategory.CONFIG,
+        #),
+        HCSelectEntityDescription(
+            key="select_hob_hood_automatic_light_off",
+            entity="Cooking.Hob.Setting.HoodAutomaticLightOff",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_hood_automatic_light_on",
+            entity="Cooking.Hob.Setting.HoodAutomaticLightOn",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_hood_automatic_start",
+            entity="Cooking.Hob.Setting.HoodAutomaticStart",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_hood_after_run",
+            entity="Cooking.Hob.Setting.HoodAfterRun",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
         ),
         HCSelectEntityDescription(
             key="select_hob_ventilation",
@@ -630,6 +680,29 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCSelectEntityDescription(
             key="select_hob_delaye_shutoff_stage",
             entity="Cooking.Hood.Setting.DelayedShutOffStage",
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_power_management",
+            entity="Cooking.Hob.Setting.PowerManagement",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_buzzer_beep_level",
+            entity="Cooking.Hob.Setting.BuzzerBeepLevel",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hob_end_timer_signal_duration",
+            entity="Cooking.Hob.Setting.EndTimerSignalduration",
+            has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSelectEntityDescription(
+            key="select_hood_interval_stage",
+            entity="Cooking.Hood.Setting.IntervalStage",
             has_state_translation=True,
         ),
         HCSelectEntityDescription(

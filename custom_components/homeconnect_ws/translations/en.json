@@ -3569,15 +3569,76 @@
           "high": "High"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Interval stage",
+      "select_hob_automatic_keylock": {
+        "name": "Automatic Keylock",
         "state": {
-          "fanoff": "Off",
-          "fanstage01": "1",
-          "fanstage02": "2",
-          "fanstage03": "3",
-          "fanstage04": "4"
+          "deactivated": "Manual",
+          "activated": "Automatic",
+          "keylockfunctiondeactivated": "Deactivated"
         }
+      },
+      "select_hob_energy_consumption_indication": {
+        "name": "Energy Consumption Indication",
+        "state": {
+          "indicationoff": "Hide",
+          "indicationon": "Show"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Vario Induction",
+        "state": {
+          "splitmode": "Split",
+          "joinmode": "Joined"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Power Level"
+      },
+      "select_hob_hood_automatic_light_off": {
+        "name": "Hood Automatic Light Off",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "select_hob_hood_automatic_light_on": {
+        "name": "Hood Automatic Light On",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Hood Automatic Start",
+        "state": {
+          "off": "Off",
+          "automaticmode": "Automatic",
+          "manualmode": "Manual"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Hood After Run",
+        "state": {
+          "off": "Off",
+          "automaticmode": "Automatic",
+          "manualmode": "Manual",
+		  "donothing": "Unchanged"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Power Management"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Buzzer Beep Level",
+        "state": {
+          "alloff": "All off",
+		  "acknowledgeoff": "Button tones off",
+		  "warningmaloff": "Warnings off",
+		  "allactive": "All active"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "End Timer Signal Duration"
       },
       "select_hob_delaye_shutoff_stage": {
         "name": "Delayed ShutOff Stage",
@@ -3594,6 +3655,16 @@
         "state": {
           "celsius": "Celsius",
           "fahrenheit": "Fahrenheit"
+        }
+      },
+      "select_hood_interval_stage": {
+        "name": "Interval stage",
+        "state": {
+          "fanoff": "Off",
+          "fanstage01": "1",
+          "fanstage02": "2",
+          "fanstage03": "3",
+          "fanstage04": "4"
         }
       },
       "select_hood_carbon_filter_type": {
@@ -3676,6 +3747,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Display brightness"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Automatic Timer"
       },
       "number_hood_interval_off": {
         "name": "Interval time off"

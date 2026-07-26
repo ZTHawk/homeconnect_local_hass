@@ -2474,14 +2474,76 @@
           "high": "Hoch"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Intervallstufe",
+      "select_hob_automatic_keylock": {
+        "name": "Automatische Tastenspeere",
         "state": {
-          "fanoff": "Aus",
-          "fanstage01": "1",
-          "fanstage02": "2",
-          "fanstage03": "3"
+          "deactivated": "Manuel",
+          "activated": "Automatisch",
+          "keylockfunctiondeactivated": "Deaktiviert"
         }
+      },
+      "select_hob_energy_consumption_indication": {
+        "name": "Energy Consumption Indication",
+        "state": {
+          "indicationoff": "Vergergen",
+          "indicationon": "Anzeigen"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Vario Induktion",
+        "state": {
+          "splitmode": "Getrennt",
+          "joinmode": "Zusammengeschaltet"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Power Level"
+      },
+      "select_hob_hood_automatic_light_off": {
+        "name": "Dunstabzugshaube Licht Aus Automatik",
+        "state": {
+          "off": "Aus",
+          "on": "An"
+        }
+      },
+      "select_hob_hood_automatic_light_on": {
+        "name": "Dunstabzugshaube Licht An Automatik",
+        "state": {
+          "off": "Aus",
+          "on": "An"
+        }
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Dunstabzugshaube Lüftersteuerung",
+        "state": {
+          "off": "Aus",
+          "automaticmode": "Automatisch",
+          "manualmode": "Manuel"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Dunstabzugshaube Lüfternachlauf",
+        "state": {
+          "off": "Aus",
+          "automaticmode": "Automatisch",
+          "manualmode": "Manuel",
+		  "donothing": "Unverändert"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Energieverbrauchsanzeige"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Signaltöne",
+        "state": {
+          "alloff": "Alle aus",
+		  "acknowledgeoff": "Tastentöne aus",
+		  "warningmaloff": "Fehlbedienungssignale aus",
+		  "allactive": "Alle an"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "Signaldauer"
       },
       "select_hob_delaye_shutoff_stage": {
         "name": "Verzögerte Abschaltstufe",
@@ -2497,6 +2559,15 @@
         "state": {
           "celsius": "Celsius",
           "fahrenheit": "Fahrenheit"
+        }
+      },
+      "select_hood_interval_stage": {
+        "name": "Intervallstufe",
+        "state": {
+          "fanoff": "Aus",
+          "fanstage01": "1",
+          "fanstage02": "2",
+          "fanstage03": "3"
         }
       },
       "select_hood_carbon_filter_type": {
@@ -2570,6 +2641,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Display Helligkeit"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Automatischer Timer"
       },
       "number_start_in": {
         "name": "Starten in"

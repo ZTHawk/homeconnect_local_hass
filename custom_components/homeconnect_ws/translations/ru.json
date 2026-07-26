@@ -1600,8 +1600,8 @@
           "highforce": "Высокая"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Интервальная ступень",
+      "select_hob_delaye_shutoff_stage": {
+        "name": "Ступень отложенного выключения",
         "state": {
           "fanoff": "Выключено",
           "fanstage01": "1",
@@ -1609,8 +1609,79 @@
           "fanstage03": "3"
         }
       },
-      "select_hob_delaye_shutoff_stage": {
-        "name": "Ступень отложенного выключения",
+      "select_hob_automatic_keylock": {
+        "name": "Автоматическая блокировка кнопок",
+        "state": {
+          "deactivated": "Вручную",
+          "activated": "Автоматический",
+          "keylockfunctiondeactivated": "Деактивировано"
+        }
+      },
+      "select_hob_energy_consumption_indication": {
+        "name": "Индикация энергопотребления",
+        "state": {
+          "indicationoff": "Скрыть",
+          "indicationon": "Показать"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Вариоиндукция",
+        "state": {
+          "splitmode": "Разделить",
+          "joinmode": "Объединено"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Уровень мощности"
+      },
+      "select_hob_hood_automatic_light_off": {
+        "name": "Автоматическое выключение подсветки вытяжки",
+        "state": {
+          "off": "Выкл",
+          "on": "Вкл"
+        }
+      },
+      "select_hob_hood_automatic_light_on": {
+        "name": "Автоматическое включение подсветки вытяжки",
+        "state": {
+          "off": "Выкл",
+          "on": "Вкл"
+        }
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Автоматический запуск вытяжки",
+        "state": {
+          "off": "Выкл",
+          "automaticmode": "Автоматический",
+          "manualmode": "Вручную"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Остаточный ход вытяжки",
+        "state": {
+          "off": "Выкл",
+          "automaticmode": "Автоматический",
+          "manualmode": "Вручную",
+		  "donothing": "Без изменений"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Управление мощностью"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Уровень звукового сигнала",
+        "state": {
+          "alloff": "Все выключено",
+		  "acknowledgeoff": "Звук кнопок выкл",
+		  "warningmaloff": "Предупреждения выкл",
+		  "allactive": "Все активны"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "End Timer Signal duration"
+      },
+      "select_hood_interval_stage": {
+        "name": "Интервальная ступень",
         "state": {
           "fanoff": "Выключено",
           "fanstage01": "1",
@@ -1666,6 +1737,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Яркость дисплея"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Автоматический таймер"
       },
       "number_hood_interval_off": {
         "name": "Время интервала выключения"

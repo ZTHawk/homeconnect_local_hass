@@ -1722,15 +1722,6 @@
           "highforce": "Høy"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Intervalltrinn",
-        "state": {
-          "fanoff": "Av",
-          "fanstage01": "1",
-          "fanstage02": "2",
-          "fanstage03": "3"
-        }
-      },
       "select_hob_delaye_shutoff_stage": {
         "name": "Forsinket avstengingstrinn",
         "state": {
@@ -1740,11 +1731,91 @@
           "fanstage03": "3"
         }
       },
+      "select_hob_automatic_keylock": {
+        "name": "Automatisk tastelås",
+        "state": {
+          "deactivated": "Manuell",
+          "activated": "Automatisk",
+          "keylockfunctiondeactivated": "Deaktivert"
+        }
+      },
+      "select_hob_energy_consumption_indication": {
+        "name": "Indikator for energiforbruk",
+        "state": {
+          "indicationoff": "Skjul",
+          "indicationon": "Vis"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Varioinduksjon",
+        "state": {
+          "splitmode": "Dele",
+          "joinmode": "Koblet"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Effektnivå"
+      },
+      "select_hob_hood_automatic_light_off": {
+        "name": "Automatisk slukking av ventilatorlys",
+        "state": {
+          "off": "Av",
+          "on": "På"
+        }
+      },
+      "select_hob_hood_automatic_light_on": {
+        "name": "Automatisk tenning av ventilatorlys",
+        "state": {
+          "off": "Av",
+          "on": "På"
+        }
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Automatisk start av ventilator",
+        "state": {
+          "off": "Av",
+          "automaticmode": "Automatisk",
+          "manualmode": "Manuell"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Etterløp for ventilator",
+        "state": {
+          "off": "Av",
+          "automaticmode": "Automatisk",
+          "manualmode": "Manuell",
+		  "donothing": "Uendret"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Effekthåndtering"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Signaltonnivå",
+        "state": {
+          "alloff": "Alt av",
+		  "acknowledgeoff": "Tastelyd av",
+		  "warningmaloff": "Varsler av",
+		  "allactive": "Alle aktive"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "End Timer Signal duration"
+      },
       "select_temperature_unit": {
         "name": "Temperatursenhet",
         "state": {
           "celsius": "Celsius",
           "fahrenheit": "Fahrenheit"
+        }
+      },
+      "select_hood_interval_stage": {
+        "name": "Intervalltrinn",
+        "state": {
+          "fanoff": "Av",
+          "fanstage01": "1",
+          "fanstage02": "2",
+          "fanstage03": "3"
         }
       },
       "select_hood_carbon_filter_type": {
@@ -1821,6 +1892,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Skjermlysstyrke"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Automatisk tidsur"
       },
       "number_hood_interval_off": {
         "name": "Intervalltid av"
