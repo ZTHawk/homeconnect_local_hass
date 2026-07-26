@@ -3687,7 +3687,7 @@
         "name": "Display brightness"
       },
       "number_oven_sound_volume": {
-        "name": "Sound volume"
+        "name": "Volume"
       },
       "number_hood_interval_off": {
         "name": "Interval time off"
