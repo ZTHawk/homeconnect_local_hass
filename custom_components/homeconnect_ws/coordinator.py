@@ -154,18 +154,22 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         """
         Whether being disconnected right now is expected, not a fault.
 
-        True only for appliance types confirmed to legitimately cut their own
-        WiFi (EXPECTED_OFFLINE_APPLIANCE_TYPES) AND only when the *most
-        recent* disconnect was a clean code-1000 closure. An unexpected drop
-        - any other close code, or None if the appliance was never seen
-        sending one - still correctly reports as not expected, even for an
-        otherwise-exempt appliance type. Matches ESPHome's has_deep_sleep +
-        expected_disconnect pattern for its own sleepy-device entities.
+        True for appliance types confirmed to legitimately cut their own WiFi
+        (EXPECTED_OFFLINE_APPLIANCE_TYPES), unless the *most recent* close
+        code is positively known to be something other than a clean code-1000
+        closure. No close code observed yet at all (None) also counts as
+        expected here, not just 1000 - a fresh HA restart rebuilds the
+        session from scratch, wiping last_close_code back to None before this
+        process has ever connected, which otherwise made every entity show
+        Unavailable on restart whenever the appliance simply happened to be
+        off (confirmed live on fork issue #7). These appliance types are
+        already treated as "unreachable is normal" everywhere else (no setup
+        blocking, debug-only connect-failure logging), so a restart
+        shouldn't be the one place that starts them out looking broken.
         """
-        return (
-            not self._escalate_connectivity_logging
-            and self.appliance.session.last_close_code == 1000
-        )
+        if self._escalate_connectivity_logging:
+            return False
+        return self.appliance.session.last_close_code in {None, 1000}
 
     async def close(self) -> None:
         self._connecting = False
