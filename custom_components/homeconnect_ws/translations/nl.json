@@ -158,9 +158,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "Binnenverlichting TheaterMode"
       },
-      "switch_hood_boost": {
-        "name": "Boost"
-      },
       "switch_hood_silence_mode": {
         "name": "Stille modus"
       },
@@ -1970,6 +1967,25 @@
           "level17": "Niveau 9",
           "boostlevel1": "Boost 1",
           "boostlevel2": "Boost 2"
+        }
+      },
+      "select_hood_boost": {
+        "name": "Boost",
+        "state": {
+          "intensivestageoff": "Uit",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "Kleurtemperatuurmodus",
+        "state": {
+          "custom": "Aangepast",
+          "warm": "Warm",
+          "warmtoneutral": "Warm naar neutraal",
+          "neutral": "Neutraal",
+          "neutraltocold": "Neutraal naar koud",
+          "cold": "Koud"
         }
       }
     },
