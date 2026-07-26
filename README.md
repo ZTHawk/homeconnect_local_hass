@@ -247,9 +247,40 @@ Wash program selection and options (half load, hygiene plus, extra dry, extra ri
 
 Program options including temperature, spin speed, prewash, rinse plus, gentle cycle, and hygienic steam; iDos automatic dosing (levels 1 & 2); drum light and door ring LED control (brightness and color mode); anti-wrinkle guard; maintenance reminders (drum clean, lint filter full); condensate container alert (dryer).
 
-### Oven / Hob / Hood
+### Oven
 
-Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital); hood fan speed control, ambient and work lighting, automatic shutoff delay, interval ventilation, grease and carbon filter saturation sensors and one-tap reset buttons; hob ventilation level.
+Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital)
+
+### Hob
+
+- Automatic timer
+  - Time (minutes) after which a zone turns off automatically
+- Automatic keylock
+  - Defines if keylock (childlock) is turned on automatically, manually or turned off completely
+- BridgeZoneMode
+  - When turning on hob this indicates if some zone (pre defined) are joined or split
+- EnergyConsumptionIndication
+  - Indicates if energy consumption (kWh) shall be displayed after hob is turned off
+- PowerManagement
+  - Maximum power drain (off or 1000W up to 9000W; 500W steps)
+- BuzzerBeepLevel
+  - Which signal types shall be played
+- EndTimerSignalduration
+  - Signal duration after timer runs out
+- Ventilation level
+- Those are only available if paired with a hood:
+  - HoodAutomaticLightOff
+    - When hob is turned off then also turn off hood light
+  - HoodAutomaticLightOn
+    - When hob is turned on then also turn on hood light
+  - HoodAutomaticStart
+    - When hob is turned on then also turn on hood fan
+  - HoodAfterRun
+    - When hob is turned off then also keep hood fan running (or not)
+
+### Hood
+
+Hood fan speed control, ambient and work lighting, automatic shutoff delay, interval ventilation, grease and carbon filter saturation sensors and one-tap reset buttons
 
 ### Coffee Maker
 
