@@ -411,9 +411,7 @@ def generate_hood_light(appliance: HomeAppliance) -> HCLightEntityDescription | 
             brightness_entity="Cooking.Common.Setting.LightingBrightness",
         )
 
-    if getattr(
-        appliance.entities.get("Cooking.Common.Setting.Lighting"), "available", False
-    ):
+    if getattr(appliance.entities.get("Cooking.Common.Setting.Lighting"), "available", False):
         return HCLightEntityDescription(
             key="light_cooking_lighting",
             entity="Cooking.Common.Setting.Lighting",
