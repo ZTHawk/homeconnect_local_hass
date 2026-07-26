@@ -174,7 +174,7 @@
         "name": "Ovnslys under drift"
       },
       "switch_oven_night_dimout": {
-        "name": "Night dimout"
+        "name": "Nattdemping"
       },
       "switch_oven_sabbath_mode": {
         "name": "Sabbatsmodus"
