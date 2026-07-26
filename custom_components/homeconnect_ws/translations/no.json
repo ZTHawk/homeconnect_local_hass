@@ -173,8 +173,17 @@
       "switch_oven_light_during_operation": {
         "name": "Ovnslys under drift"
       },
+      "switch_oven_night_dimout": {
+        "name": "Nattdemping"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Sabbatsmodus"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Teleskopisk uttrekk"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Vis merkevarelogo"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbatsmodus"
@@ -1892,6 +1901,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Skjermlysstyrke"
+      },
+      "number_oven_sound_volume": {
+        "name": "Lydstyrke"
       },
       "number_hob_automatic_timer": {
         "name": "Automatisk tidsur"

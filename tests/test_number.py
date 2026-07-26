@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
+from custom_components.homeconnect_ws import HCData
+from custom_components.homeconnect_ws.entity_descriptions.descriptions_definitions import (
+    HCNumberEntityDescription,
+)
+from custom_components.homeconnect_ws.number import HCNumber
 from home_disconnect.message import Action, Message
 from homeassistant.components.number import (
     ATTR_MAX,
@@ -93,3 +99,40 @@ async def test_set_value(
             data={"uid": 204, "value": 2},
         )
     )
+
+
+async def test_native_value_cleared_when_expected_offline() -> None:
+    """Stale program-duration values clear instead of showing a frozen number."""
+    appliance = MagicMock()
+    appliance.info = {"deviceID": "test_device_id"}
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=True),
+    )
+    entity_description = HCNumberEntityDescription(
+        key="number_duration", clear_on_expected_offline=True
+    )
+    entity = HCNumber(entity_description, runtime_data)
+
+    assert entity.native_value is None
+
+
+async def test_native_value_not_cleared_when_not_expected_offline() -> None:
+    """The clearing only applies while actually expected_offline."""
+    appliance = MagicMock()
+    appliance.info = {"deviceID": "test_device_id"}
+    appliance.entities["Test.Number"].value = 12960
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=False),
+    )
+    entity_description = HCNumberEntityDescription(
+        key="number_duration", entity="Test.Number", clear_on_expected_offline=True
+    )
+    entity = HCNumber(entity_description, runtime_data)
+
+    assert entity.native_value == 12960

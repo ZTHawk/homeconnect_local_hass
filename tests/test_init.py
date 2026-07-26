@@ -104,6 +104,48 @@ async def test_setup_entry_washer_connect_failure_is_non_blocking(
     await hass.config_entries.async_unload(entry.entry_id)
 
 
+async def test_washer_expected_offline_on_fresh_restart(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    A fresh HA restart must not make a simply-off washer look broken.
+
+    Confirmed live on fork issue #7: entities showed Unavailable after every
+    HA restart while the washer was just powered off, since last_close_code
+    lives on the in-memory session and resets to None on every fresh
+    process start - before this process has witnessed any close code at
+    all, let alone specifically 1000. expected_offline used to require
+    proof of a clean code-1000 close, so "no evidence yet" was wrongly
+    treated the same as "known bad".
+    """
+    description = deepcopy(DEVICE_DESCRIPTION)
+    description["info"]["type"] = "Washer"
+    appliance = MockAppliance(description, "host", "mock_app", "mock_app_id", "PSK_KEY")
+    appliance.session.connect = AsyncMock(side_effect=ConnectionFailedError)
+    appliance.session.last_close_code = None
+    appliance_mock = Mock(return_value=appliance)
+    monkeypatch.setattr(coordinator, "HomeAppliance", appliance_mock)
+
+    config_data = deepcopy(MOCK_CONFIG_DATA)
+    config_data[CONF_DESCRIPTION] = description
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=config_data,
+        unique_id=MOCK_TLS_DEVICE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(entry.entry_id)
+    coord = entry.runtime_data.coordinator
+
+    assert coord.expected_offline is True
+
+    # A confirmed non-clean close code still correctly reports as not expected.
+    appliance.session.last_close_code = 1006
+    assert coord.expected_offline is False
+
+
 async def test_washer_background_connect_does_not_block_till_done(
     hass: HomeAssistant,
     monkeypatch: pytest.MonkeyPatch,

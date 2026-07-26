@@ -134,8 +134,17 @@
       "switch_oven_light_during_operation": {
         "name": "Ofenlicht während Betrieb"
       },
+      "switch_oven_night_dimout": {
+        "name": "Nachtabdunkelung"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Sabbat Modus"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Teleskopauszug"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Markenlogo anzeigen"
       },
       "switch_zeolite_dry": {
         "name": "CrystalDry"
@@ -2641,6 +2650,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Display Helligkeit"
+      },
+      "number_oven_sound_volume": {
+        "name": "Lautstärke"
       },
       "number_hob_automatic_timer": {
         "name": "Automatischer Timer"

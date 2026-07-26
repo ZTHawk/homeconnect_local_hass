@@ -176,8 +176,17 @@
       "switch_oven_light_during_operation": {
         "name": "运行时炉灯"
       },
+      "switch_oven_night_dimout": {
+        "name": "夜间调暗"
+      },
       "switch_oven_sabbath_mode": {
         "name": "安息日模式"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "伸缩式滑出"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "显示品牌标志"
       },
       "switch_refrigerator_sabbath_mode": {
         "name": "安息日模式"
@@ -1817,6 +1826,9 @@
       },
       "number_oven_display_brightness": {
         "name": "显示屏亮度"
+      },
+      "number_oven_sound_volume": {
+        "name": "体积"
       },
       "number_hob_automatic_timer": {
         "name": "自动计时器"

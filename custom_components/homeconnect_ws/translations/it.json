@@ -167,8 +167,17 @@
       "switch_oven_light_during_operation": {
         "name": "Luce forno durante le operazioni"
       },
+      "switch_oven_night_dimout": {
+        "name": "Attenuazione notturna"
+      },
       "switch_oven_sabbath_mode": {
         "name": "Modalità Sabbath"
+      },
+      "switch_oven_teloscopic_slide_out_refited": {
+        "name": "Elemento telescopico estraibile"
+      },
+      "switch_oven_display_brand_logo": {
+        "name": "Visualizza il logo del brand"
       }
     },
     "binary_sensor": {
@@ -1503,6 +1512,9 @@
       },
       "number_oven_display_brightness": {
         "name": "Luminosità display"
+      },
+      "number_oven_sound_volume": {
+        "name": "Volume"
       },
       "number_hob_automatic_timer": {
         "name": "Automatic Timer"

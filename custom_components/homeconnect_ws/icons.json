@@ -68,6 +68,15 @@
             "switch_oven_display_standby_dimmed": {
                 "default": "mdi:brightness-4"
             },
+			"switch_oven_night_dimout": {
+				"default": "mdi:lightbulb-night"
+			},
+			"switch_oven_teloscopic_slide_out_refited": {
+				"default": "mdi:telescope"
+			},
+			"switch_oven_display_brand_logo": {
+				"default": "mdi:trademark"
+			},
             "switch_dishwasher_sanitation": {
                 "default": "mdi:bacteria-outline"
             },
@@ -428,6 +437,9 @@
             },
             "number_refrigerator_sabbath_mode_duration": {
                 "default": "mdi:timer-outline"
+            },
+            "number_oven_sound_volume": {
+                "default": "mdi:volume-high"
             }
         }
     },

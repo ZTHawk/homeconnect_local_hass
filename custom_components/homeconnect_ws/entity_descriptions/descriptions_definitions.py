@@ -38,6 +38,13 @@ class HCEntityDescription(EntityDescription, frozen_or_thawed=True):
     entities: list[str] | None = None
     available_access: tuple[Access, ...] | None = None
     extra_attributes: list[ExtraAttributeDict] | None = None
+    # For laundry appliances only: unlike appliance types that stay connected,
+    # these never get to send the natural end-of-program update (remaining
+    # time -> 0, progress -> 100%) that would otherwise settle these values -
+    # the clean disconnect that freezes them is the same event that prevents
+    # it. Clears to None instead of showing a stale in-progress-looking value
+    # once coordinator.expected_offline is true.
+    clear_on_expected_offline: bool = False
 
 
 class HCSelectEntityDescription(
@@ -75,14 +82,10 @@ class HCSensorEntityDescription(
 
     available_access: tuple[Access, ...] = (Access.READ, Access.READ_WRITE)
     has_state_translation: bool = False
+    # See HCSelectEntityDescription.force_option_when_expected_offline - same
+    # race, but for a read-only enum sensor instead of the select.
+    force_option_when_expected_offline: str | None = None
     mapping: dict[str, str] | None = None
-    # For laundry appliances only: unlike appliance types that stay connected,
-    # these never get to send the natural end-of-program update (remaining
-    # time -> 0, progress -> 100%) that would otherwise settle these values -
-    # the clean disconnect that freezes them is the same event that prevents
-    # it. Clears to None instead of showing a stale in-progress-looking value
-    # once coordinator.expected_offline is true.
-    clear_on_expected_offline: bool = False
 
 
 class HCBinarySensorEntityDescription(

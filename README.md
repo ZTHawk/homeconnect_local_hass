@@ -249,7 +249,7 @@ Program options including temperature, spin speed, prewash, rinse plus, gentle c
 
 ### Oven
 
-Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital)
+Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital), night-time display dimming, sound volume, telescopic slide-out rail, and brand logo display
 
 ### Hob
 
