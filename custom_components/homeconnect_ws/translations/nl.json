@@ -143,6 +143,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Merklogo weergeven"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indicatie van het energieverbruik"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Automatische uitschakeling verlichting afzuigkap"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Automatische inschakeling verlichting afzuigkap"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbat modus"
       },
@@ -1924,14 +1933,55 @@
           "highforce": "Hoog"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Interval",
+      "select_hob_automatic_keylock": {
+        "name": "Automatische toetsenvergrendeling",
         "state": {
-          "fanoff": "Uit",
-          "fanstage01": "1",
-          "fanstage02": "2",
-          "fanstage03": "3"
+          "deactivated": "Handmatig",
+          "activated": "Automatisch",
+          "keylockfunctiondeactivated": "Gedeactiveerd"
         }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Vario-inductie",
+        "state": {
+          "splitmode": "Splitsen",
+          "joinmode": "Gekoppeld"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Vermogensniveau"
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Automatische start afzuigkap",
+        "state": {
+          "off": "Uit",
+          "automaticmode": "Automatisch",
+          "manualmode": "Handmatig"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Nalooptijd afzuigkap",
+        "state": {
+          "off": "Uit",
+          "automaticmode": "Automatisch",
+          "manualmode": "Handmatig",
+		  "donothing": "Ongewijzigd"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Maximaal opgenomen vermogen"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Niveau van het geluidssignaal",
+        "state": {
+          "alloff": "Alles uit",
+		  "acknowledgeoff": "Toetstonen uit",
+		  "warningmaloff": "Waarschuwingen uit",
+		  "allactive": "Alles actief"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "Duur eindsignaal timer"
       },
       "select_hob_delayed_shutoff_stage": {
         "name": "Vertraagde uitschakeling niveau",
@@ -1967,6 +2017,15 @@
           "level17": "Niveau 9",
           "boostlevel1": "Boost 1",
           "boostlevel2": "Boost 2"
+        }
+      },
+      "select_hood_interval_stage": {
+        "name": "Interval",
+        "state": {
+          "fanoff": "Uit",
+          "fanstage01": "1",
+          "fanstage02": "2",
+          "fanstage03": "3"
         }
       },
       "select_hood_boost": {
@@ -2039,6 +2098,9 @@
       },
       "number_oven_sound_volume": {
         "name": "Volume"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Automatische timer"
       },
       "number_hood_interval_off": {
         "name": "Tijdsinterval uitschakelen"

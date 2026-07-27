@@ -188,6 +188,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Visa varumärkeslogotyp"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Energy Consumption Indication"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Automatisk avstängning av fläktbelysning"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Automatisk start av fläktbelysning"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbatsläge"
       },
@@ -1738,8 +1747,8 @@
           "highforce": "Hög"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "Intervallsteg",
+      "select_hob_delaye_shutoff_stage": {
+        "name": "Fördröjd avstängning – steg",
         "state": {
           "fanoff": "Av",
           "fanstage01": "1",
@@ -1747,8 +1756,58 @@
           "fanstage03": "3"
         }
       },
-      "select_hob_delaye_shutoff_stage": {
-        "name": "Fördröjd avstängning – steg",
+      "select_hob_automatic_keylock": {
+        "name": "Automatiskt knapplås",
+        "state": {
+          "deactivated": "Manuell",
+          "activated": "Automatisk",
+          "keylockfunctiondeactivated": "Inaktiverad"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "Varioinduktion",
+        "state": {
+          "splitmode": "Dela",
+          "joinmode": "Kopplad"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Effektnivå"
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Automatisk start av fläkt",
+        "state": {
+          "off": "Av",
+          "automaticmode": "Automatisk",
+          "manualmode": "Manuell"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Eftergång för fläkt",
+        "state": {
+          "off": "Av",
+          "automaticmode": "Automatisk",
+          "manualmode": "Manuell",
+		  "donothing": "Oförändrad"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Maximal effektförbrukning"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Signaltonsnivå",
+        "state": {
+          "alloff": "Allt av",
+		  "acknowledgeoff": "Knappljud av",
+		  "warningmaloff": "Varningar av",
+		  "allactive": "Alla aktiva"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "Varaktighet för signal vid avslutad timer"
+      },
+      "select_hood_interval_stage": {
+        "name": "Intervallsteg",
         "state": {
           "fanoff": "Av",
           "fanstage01": "1",
@@ -1832,6 +1891,9 @@
       },
       "number_oven_sound_volume": {
         "name": "Ljudvolym"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Automatisk timer"
       },
       "number_hood_interval_off": {
         "name": "Intervall – av"

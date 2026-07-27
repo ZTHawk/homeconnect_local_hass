@@ -188,6 +188,15 @@
       "switch_oven_display_brand_logo": {
         "name": "显示品牌标志"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "能耗指示"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "油烟机自动关灯"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "引擎盖自动照明"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "安息日模式"
       },
@@ -1651,15 +1660,6 @@
           "high": "高"
         }
       },
-      "select_hood_interval_stage": {
-        "name": "间歇档位",
-        "state": {
-          "fanoff": "关闭",
-          "fanstage01": "1档",
-          "fanstage02": "2档",
-          "fanstage03": "3档"
-        }
-      },
       "select_hob_delaye_shutoff_stage": {
         "name": "延时关机档位",
         "state": {
@@ -1669,11 +1669,70 @@
           "fanstage03": "3档"
         }
       },
+      "select_hob_automatic_keylock": {
+        "name": "自动按键锁定",
+        "state": {
+          "deactivated": "手动的",
+          "activated": "自动的",
+          "keylockfunctiondeactivated": "已停用"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "桥接区域模式",
+        "state": {
+          "splitmode": "分裂",
+          "joinmode": "已加入"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "战力等级"
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "油烟机自动启动",
+        "state": {
+          "off": "关闭",
+          "automaticmode": "自动的",
+          "manualmode": "手动的"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "烟机延时关机",
+        "state": {
+          "off": "关闭",
+          "automaticmode": "自动的",
+          "manualmode": "手动的",
+		  "donothing": "未变"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "最大功耗"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "蜂鸣器提示音量级",
+        "state": {
+          "alloff": "全部关闭",
+		  "acknowledgeoff": "按键音已关闭",
+		  "warningmaloff": "关闭警告",
+		  "allactive": "全部启用"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "结束计时器信号持续时间"
+      },
       "select_temperature_unit": {
         "name": "温度单位",
         "state": {
           "celsius": "摄氏度",
           "fahrenheit": "华氏度"
+        }
+      },
+      "select_hood_interval_stage": {
+        "name": "间歇档位",
+        "state": {
+          "fanoff": "关闭",
+          "fanstage01": "1档",
+          "fanstage02": "2档",
+          "fanstage03": "3档"
         }
       },
       "select_hood_carbon_filter_type": {
@@ -1774,6 +1833,9 @@
       },
       "number_oven_sound_volume": {
         "name": "体积"
+      },
+      "number_hob_automatic_timer": {
+        "name": "自动计时器"
       },
       "number_hood_interval_off": {
         "name": "间歇关闭时间"

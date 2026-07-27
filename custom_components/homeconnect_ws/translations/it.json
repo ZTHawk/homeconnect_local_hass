@@ -178,6 +178,15 @@
       },
       "switch_oven_display_brand_logo": {
         "name": "Visualizza il logo del brand"
+      },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indicazione del consumo energetico"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Spegnimento automatico luce cappa"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Accensione automatica luce cappa"
       }
     },
     "binary_sensor": {
@@ -1395,6 +1404,56 @@
           "medium": "Medio",
           "long": "Lungo"
         }
+      },
+      "select_hob_automatic_keylock": {
+        "name": "Blocco tasti automatico",
+        "state": {
+          "deactivated": "Manuale",
+          "activated": "Automatico",
+          "keylockfunctiondeactivated": "Disattivato"
+        }
+      },
+      "select_hob_bridge_zone_mode": {
+        "name": "VarioInduzione",
+        "state": {
+          "splitmode": "Separa",
+          "joinmode": "Collegato"
+        }
+      },
+      "select_hob_power_level": {
+        "name": "Livello di potenza"
+      },
+      "select_hob_hood_automatic_start": {
+        "name": "Avvio automatico cappa",
+        "state": {
+          "off": "Spento",
+          "automaticmode": "Automatico",
+          "manualmode": "Manuale"
+        }
+      },
+      "select_hob_hood_after_run": {
+        "name": "Funzionamento prolungato cappa",
+        "state": {
+          "off": "Spento",
+          "automaticmode": "Automatico",
+          "manualmode": "Manuale",
+		  "donothing": "Invariato"
+        }
+      },
+      "select_hob_power_management": {
+        "name": "Potenza massima assorbita"
+      },
+      "select_hob_buzzer_beep_level": {
+        "name": "Livello segnale acustico",
+        "state": {
+          "alloff": "Tutto spento",
+		  "acknowledgeoff": "Toni tasti spenti",
+		  "warningmaloff": "Avvisi disattivati",
+		  "allactive": "Tutto attivo"
+        }
+      },
+      "select_hob_end_timer_signal_duration": {
+        "name": "Durata del segnale di fine timer"
       }
     },
     "button": {
@@ -1444,6 +1503,9 @@
       },
       "number_oven_sound_volume": {
         "name": "Volume"
+      },
+      "number_hob_automatic_timer": {
+        "name": "Timer automatico"
       },
       "number_start_in": {
         "name": "Avvio tra"
