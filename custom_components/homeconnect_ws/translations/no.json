@@ -1806,7 +1806,7 @@
         }
       },
       "select_hob_end_timer_signal_duration": {
-        "name": "End Timer Signal duration"
+        "name": "Varighet for sluttsignal på timer"
       },
       "select_temperature_unit": {
         "name": "Temperatursenhet",
