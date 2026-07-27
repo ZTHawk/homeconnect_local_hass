@@ -277,7 +277,10 @@ async def test_select_program(
             action=Action.POST,
             data={
                 "program": 501,
-                "options": [{"uid": 401, "value": None}, {"uid": 402, "value": None}],
+                # override_options=True: no merged-in options, since a stale
+                # shared option value can be out of range for the newly
+                # selected program (confirmed live on fork issues #9/#21).
+                "options": [],
             },
         )
     )

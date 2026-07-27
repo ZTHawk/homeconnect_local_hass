@@ -182,6 +182,18 @@ class HCProgram(HCSelect):
     async def async_select_option(self, option: str) -> None:
         selected_program = self._runtime_data.appliance.programs[self._rev_programs[option]]
         if selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
-            await selected_program.select()
+            # override_options=True (send no options) rather than merging in
+            # each option's current shared value: a single option UID can have
+            # a different valid range depending on which program last set it
+            # (confirmed live on fork issues #9/#21 - the same UID sent 160 in
+            # a stale, out-of-range value from a previous program and got a
+            # 400, but 80 - a value actually valid for the new program -
+            # succeeded). The official cloud API selects programs with an
+            # empty options list for exactly this reason, letting the
+            # appliance apply its own per-program defaults instead. Only
+            # start()'s START_ONLY path (see issue #14) actually needs the
+            # opposite - some options there have no safe appliance-side
+            # default at all - so this doesn't touch that branch.
+            await selected_program.select(override_options=True)
         elif selected_program.execution == Execution.START_ONLY:
             await selected_program.start()
