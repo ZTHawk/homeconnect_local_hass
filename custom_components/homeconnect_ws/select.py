@@ -45,33 +45,34 @@ class HCSelect(HCEntity, SelectEntity):
     """Select Entity."""
 
     entity_description: HCSelectEntityDescription
-    _rev_options: dict[str, str]
 
-    def __init__(
-        self,
-        entity_description: HCSelectEntityDescription,
-        runtime_data: HCData,
-    ) -> None:
-        super().__init__(entity_description, runtime_data)
+    @property
+    def _rev_options(self) -> dict[str, str]:
+        """Lowercased value -> real enum value, only meaningful with has_state_translation."""
+        if not self.entity_description.has_state_translation:
+            return {}
+        if self._entity is None or not self._entity.enum:
+            return {}
+        return {str(value).lower(): value for value in self._settable_enum_values()}
 
-        self._rev_options = {}
-        if entity_description.options:
-            self._attr_options = entity_description.options
-        elif self._entity is not None and self._entity.enum:
+    @property
+    def options(self) -> list[str]:
+        # Computed live rather than cached once at __init__: unlike a
+        # Setting, an Option entity's enum isn't guaranteed to be populated
+        # yet by the time entities are constructed (confirmed live on fork
+        # issue #17 - HA's own SelectEntity.options raises AttributeError,
+        # which kills entity registration outright, if neither this nor
+        # entity_description.options is ever set). Falling back to an empty
+        # list here is safe either way: current_option already treats
+        # anything not in this list as unavailable/None.
+        if self.entity_description.options:
+            return self.entity_description.options
+        if self._entity is not None and self._entity.enum:
             enum_values = self._settable_enum_values()
-            self._attr_options = []
             if self.entity_description.has_state_translation:
-                for value in enum_values:
-                    self._attr_options.append(str(value).lower())
-            else:
-                for value in enum_values:
-                    self._attr_options.append(str(value))
-
-        if self.entity_description.has_state_translation and (
-            self._entity is not None and self._entity.enum
-        ):
-            for value in self._settable_enum_values():
-                self._rev_options[str(value).lower()] = value
+                return [str(value).lower() for value in enum_values]
+            return [str(value) for value in enum_values]
+        return []
 
     def _settable_enum_values(self) -> list[str]:
         """Return enum values allowed by the appliance min/max range."""
@@ -99,10 +100,10 @@ class HCSelect(HCEntity, SelectEntity):
             return None
         if self.entity_description.has_state_translation:
             value = str(self._entity.value).lower()
-            if value in self._attr_options:
+            if value in self.options:
                 return value
         value = str(self._entity.value)
-        if value in self._attr_options:
+        if value in self.options:
             return value
         return None
 

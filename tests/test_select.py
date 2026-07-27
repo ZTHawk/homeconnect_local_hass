@@ -386,3 +386,33 @@ async def test_current_option_not_forced_when_not_expected_offline() -> None:
     entity = HCSelect(entity_description, runtime_data)
 
     assert entity.current_option is None
+
+
+async def test_options_does_not_crash_when_enum_not_yet_populated() -> None:
+    """
+    Confirmed live on fork issue #17.
+
+    HA's SelectEntity.options raises AttributeError (killing entity setup
+    entirely) if it's never set. An Option entity's enum isn't guaranteed
+    to be populated by the time entities are constructed, unlike a
+    Setting, so options must be computed live and fall back to an empty
+    list rather than relying on something set once at __init__.
+    """
+    appliance = MagicMock()
+    appliance.info = {"deviceID": "test_device_id"}
+    appliance.entities["Cooking.Common.Option.Hood.Boost"].enum = None
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=False),
+    )
+    entity_description = HCSelectEntityDescription(
+        key="select_hood_boost",
+        entity="Cooking.Common.Option.Hood.Boost",
+        has_state_translation=True,
+    )
+    entity = HCSelect(entity_description, runtime_data)
+
+    assert entity.options == []
+    assert entity.current_option is None

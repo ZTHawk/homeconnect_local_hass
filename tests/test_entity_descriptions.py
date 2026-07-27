@@ -341,7 +341,7 @@ async def test_hood_boost_is_a_three_stage_select(
     )
     entity = HCSelect(entity_description, runtime_data)
 
-    assert entity._attr_options == [
+    assert entity.options == [
         "intensivestageoff",
         "intensivestage1",
         "intensivestage2",
@@ -393,7 +393,7 @@ async def test_hood_color_temperature_mode_select(
     )
     entity = HCSelect(entity_description, runtime_data)
 
-    assert entity._attr_options == [
+    assert entity.options == [
         "custom",
         "warm",
         "warmtoneutral",
