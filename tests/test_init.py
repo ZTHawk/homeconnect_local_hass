@@ -315,7 +315,14 @@ async def test_nudge_reconnect_schedules_immediate_retry_for_disconnected_washer
     appliance.session.connect = AsyncMock()
     appliance.session.connected = True
     coord.async_nudge_reconnect()
-    await hass.async_block_till_done()
+    # async_nudge_reconnect() schedules its retry via
+    # async_create_background_task() (see coordinator.py - deliberately not
+    # tracked by HA's startup sequencing), so a plain async_block_till_done()
+    # isn't guaranteed to wait for it. Whether it happens to finish in time
+    # anyway depends on unrelated event-loop scheduling, which is exactly
+    # the kind of thing that can differ between HA versions - explicitly
+    # opt in to waiting for it instead of relying on that.
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     assert coord.connected is True
 
@@ -450,7 +457,10 @@ async def test_zeroconf_nudges_reconnect_for_loaded_laundry_entry(
         context={"source": SOURCE_ZEROCONF},
         data=_make_zeroconf_discovery_info(config_data[CONF_HOST]),
     )
-    await hass.async_block_till_done()
+    # Same as test_nudge_reconnect_schedules_immediate_retry_for_disconnected_washer:
+    # the nudge's retry runs via async_create_background_task(), not waited on by
+    # async_block_till_done() unless explicitly requested.
+    await hass.async_block_till_done(wait_background_tasks=True)
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"

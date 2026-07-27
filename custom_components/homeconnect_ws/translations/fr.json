@@ -200,9 +200,6 @@
       "switch_refrigeration_light_theater_mode": {
         "name": "Internal Light TheaterMode"
       },
-      "switch_hood_boost": {
-        "name": "Boost"
-      },
       "switch_hood_silence_mode": {
         "name": "Mode silencieux"
       },
@@ -1808,6 +1805,25 @@
           "none": "None",
           "fahrenheit": "Basic Carbon filter",
           "regenerativecarbonfilter": "Regenerative Carbon filter"
+        }
+      },
+      "select_hood_boost": {
+        "name": "Boost",
+        "state": {
+          "intensivestageoff": "Désactivé",
+          "intensivestage1": "1",
+          "intensivestage2": "2"
+        }
+      },
+      "select_hood_color_temperature_mode": {
+        "name": "Mode de température de couleur",
+        "state": {
+          "custom": "Personnalisé",
+          "warm": "Chaud",
+          "warmtoneutral": "Chaud à neutre",
+          "neutral": "Neutre",
+          "neutraltocold": "Neutre à froid",
+          "cold": "Froid"
         }
       }
     },
