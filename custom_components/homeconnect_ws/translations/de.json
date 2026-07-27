@@ -2503,7 +2503,7 @@
         }
       },
       "select_hob_power_level": {
-        "name": "Power Level"
+        "name": "Leistungsstufe"
       },
       "select_hob_hood_automatic_light_off": {
         "name": "Dunstabzugshaube Licht Aus Automatik",
