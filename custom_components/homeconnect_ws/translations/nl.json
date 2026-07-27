@@ -143,6 +143,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Merklogo weergeven"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indicatie van het energieverbruik"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Automatische uitschakeling verlichting afzuigkap"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Automatische inschakeling verlichting afzuigkap"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbat modus"
       },
@@ -1932,13 +1941,6 @@
           "keylockfunctiondeactivated": "Gedeactiveerd"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Indicatie van het energieverbruik",
-        "state": {
-          "indicationoff": "Verbergen",
-          "indicationon": "Tonen"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "Vario-inductie",
         "state": {
@@ -1948,20 +1950,6 @@
       },
       "select_hob_power_level": {
         "name": "Vermogensniveau"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Automatische uitschakeling verlichting afzuigkap",
-        "state": {
-          "off": "Uit",
-          "on": "Aan"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Automatische inschakeling verlichting afzuigkap",
-        "state": {
-          "off": "Uit",
-          "on": "Aan"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Automatische start afzuigkap",

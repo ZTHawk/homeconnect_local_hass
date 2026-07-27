@@ -188,6 +188,15 @@
       "switch_oven_display_brand_logo": {
         "name": "显示品牌标志"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "能耗指示"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "油烟机自动关灯"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "引擎盖自动照明"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "安息日模式"
       },
@@ -1668,13 +1677,6 @@
           "keylockfunctiondeactivated": "已停用"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "能耗指示",
-        "state": {
-          "indicationoff": "隐藏",
-          "indicationon": "展示"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "桥接区域模式",
         "state": {
@@ -1684,20 +1686,6 @@
       },
       "select_hob_power_level": {
         "name": "战力等级"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "油烟机自动关灯",
-        "state": {
-          "off": "关闭",
-          "on": "在"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "引擎盖自动照明",
-        "state": {
-          "off": "关闭",
-          "on": "在"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "油烟机自动启动",

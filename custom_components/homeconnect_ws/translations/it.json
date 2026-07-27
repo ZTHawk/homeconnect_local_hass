@@ -178,6 +178,15 @@
       },
       "switch_oven_display_brand_logo": {
         "name": "Visualizza il logo del brand"
+      },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indicazione del consumo energetico"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Spegnimento automatico luce cappa"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Accensione automatica luce cappa"
       }
     },
     "binary_sensor": {
@@ -1404,13 +1413,6 @@
           "keylockfunctiondeactivated": "Disattivato"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Indicazione del consumo energetico",
-        "state": {
-          "indicationoff": "Nascondi",
-          "indicationon": "Mostra"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "VarioInduzione",
         "state": {
@@ -1420,20 +1422,6 @@
       },
       "select_hob_power_level": {
         "name": "Livello di potenza"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Spegnimento automatico luce cappa",
-        "state": {
-          "off": "Spento",
-          "on": "Acceso"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Accensione automatica luce cappa",
-        "state": {
-          "off": "Spento",
-          "on": "Acceso"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Avvio automatico cappa",

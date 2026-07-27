@@ -246,6 +246,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Display brand logo"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Energy Consumption Indication"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Hood Automatic Light Off"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Hood Automatic Light On"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbath mode"
       },
@@ -3583,13 +3592,6 @@
           "keylockfunctiondeactivated": "Deactivated"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Energy Consumption Indication",
-        "state": {
-          "indicationoff": "Hide",
-          "indicationon": "Show"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "Vario Induction",
         "state": {
@@ -3599,20 +3601,6 @@
       },
       "select_hob_power_level": {
         "name": "Power Level"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Hood Automatic Light Off",
-        "state": {
-          "off": "Off",
-          "on": "On"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Hood Automatic Light On",
-        "state": {
-          "off": "Off",
-          "on": "On"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Hood Automatic Start",

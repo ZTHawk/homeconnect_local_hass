@@ -553,6 +553,7 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="number_hob_automatic_timer",
             entity="Cooking.Hob.Setting.AutomaticTimer",
             entity_category=EntityCategory.CONFIG,
+            native_max_value=99,  # matching the Home Connect App's limit
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
@@ -638,26 +639,8 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             has_state_translation=True,
             entity_category=EntityCategory.CONFIG,
         ),
-        HCSelectEntityDescription(
-            key="select_hob_energy_consumption_indication",
-            entity="Cooking.Hob.Setting.EnergyConsumptionIndication",
-            has_state_translation=True,
-            entity_category=EntityCategory.CONFIG,
-        ),
         # Cooking.Hob.Option.PowerLevel isn't exposed here - setting it
         # returns 'Error response from Appliance: ReadRequest NotAvailable'.
-        HCSelectEntityDescription(
-            key="select_hob_hood_automatic_light_off",
-            entity="Cooking.Hob.Setting.HoodAutomaticLightOff",
-            has_state_translation=True,
-            entity_category=EntityCategory.CONFIG,
-        ),
-        HCSelectEntityDescription(
-            key="select_hob_hood_automatic_light_on",
-            entity="Cooking.Hob.Setting.HoodAutomaticLightOn",
-            has_state_translation=True,
-            entity_category=EntityCategory.CONFIG,
-        ),
         HCSelectEntityDescription(
             key="select_hob_hood_automatic_start",
             entity="Cooking.Hob.Setting.HoodAutomaticStart",
@@ -723,6 +706,27 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         ),
     ],
     "switch": [
+        HCSwitchEntityDescription(
+            key="switch_hob_energy_consumption_indication",
+            entity="Cooking.Hob.Setting.EnergyConsumptionIndication",
+            device_class=SwitchDeviceClass.SWITCH,
+            value_mapping=("IndicationOn", "IndicationOff"),
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSwitchEntityDescription(
+            key="switch_hob_hood_automatic_light_off",
+            entity="Cooking.Hob.Setting.HoodAutomaticLightOff",
+            device_class=SwitchDeviceClass.SWITCH,
+            value_mapping=("On", "Off"),
+            entity_category=EntityCategory.CONFIG,
+        ),
+        HCSwitchEntityDescription(
+            key="switch_hob_hood_automatic_light_on",
+            entity="Cooking.Hob.Setting.HoodAutomaticLightOn",
+            device_class=SwitchDeviceClass.SWITCH,
+            value_mapping=("On", "Off"),
+            entity_category=EntityCategory.CONFIG,
+        ),
         HCSwitchEntityDescription(
             key="switch_oven_fast_pre_heat",
             entity="Cooking.Oven.Option.FastPreHeat",

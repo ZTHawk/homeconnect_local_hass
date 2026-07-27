@@ -77,6 +77,15 @@
 			"switch_oven_display_brand_logo": {
 				"default": "mdi:trademark"
 			},
+			"switch_hob_energy_consumption_indication": {
+				"default": "mdi:transmission-tower"
+			},
+			"switch_hob_hood_automatic_light_off": {
+				"default": "mdi:lightbulb-auto-outline"
+			},
+			"switch_hob_hood_automatic_light_on": {
+				"default": "mdi:lightbulb-auto"
+			},
             "switch_dishwasher_sanitation": {
                 "default": "mdi:bacteria-outline"
             },
@@ -397,17 +406,8 @@
 			"select_hob_automatic_keylock": {
 				"default": "mdi:lock-reset"
 			},
-			"select_hob_energy_consumption_indication": {
-				"default": "mdi:transmission-tower"
-			},
 			"select_hob_bridge_zone_mode": {
 				"default": "mdi:arrow-split-horizontal"
-			},
-			"select_hob_hood_automatic_light_off": {
-				"default": "mdi:lightbulb-auto-outline"
-			},
-			"select_hob_hood_automatic_light_on": {
-				"default": "mdi:lightbulb-auto"
 			},
 			"select_hob_hood_automatic_start": {
 				"default": "mdi:fan-auto"

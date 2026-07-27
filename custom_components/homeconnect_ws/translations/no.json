@@ -185,6 +185,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Vis merkevarelogo"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indikator for energiforbruk"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Automatisk slukking av ventilatorlys"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Automatisk tenning av ventilatorlys"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbatsmodus"
       },
@@ -1745,13 +1754,6 @@
           "keylockfunctiondeactivated": "Deaktivert"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Indikator for energiforbruk",
-        "state": {
-          "indicationoff": "Skjul",
-          "indicationon": "Vis"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "Varioinduksjon",
         "state": {
@@ -1761,20 +1763,6 @@
       },
       "select_hob_power_level": {
         "name": "Effektnivå"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Automatisk slukking av ventilatorlys",
-        "state": {
-          "off": "Av",
-          "on": "På"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Automatisk tenning av ventilatorlys",
-        "state": {
-          "off": "Av",
-          "on": "På"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Automatisk start av ventilator",

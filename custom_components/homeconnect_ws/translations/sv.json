@@ -188,6 +188,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Visa varumärkeslogotyp"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Energy Consumption Indication"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Automatisk avstängning av fläktbelysning"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Automatisk start av fläktbelysning"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Sabbatsläge"
       },
@@ -1755,13 +1764,6 @@
           "keylockfunctiondeactivated": "Inaktiverad"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Energy Consumption Indication",
-        "state": {
-          "indicationoff": "Dölj",
-          "indicationon": "Visa"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "Varioinduktion",
         "state": {
@@ -1771,20 +1773,6 @@
       },
       "select_hob_power_level": {
         "name": "Effektnivå"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Automatisk avstängning av fläktbelysning",
-        "state": {
-          "off": "Av",
-          "on": "På"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Automatisk start av fläktbelysning",
-        "state": {
-          "off": "Av",
-          "on": "På"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Automatisk start av fläkt",

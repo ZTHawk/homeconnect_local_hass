@@ -185,6 +185,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Afficher le logo de la marque"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Indication de consommation d'énergie"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Extinction automatique de la lumière de la hotte"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Allumage automatique de la lumière de la hotte"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Mode Sabbath"
       },
@@ -1782,13 +1791,6 @@
           "keylockfunctiondeactivated": "Désactivé"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Indication de consommation d'énergie",
-        "state": {
-          "indicationoff": "Masquer",
-          "indicationon": "Afficher"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "VarioInduction",
         "state": {
@@ -1798,20 +1800,6 @@
       },
       "select_hob_power_level": {
         "name": "Niveau de puissance"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Extinction automatique de la lumière de la hotte",
-        "state": {
-          "off": "Désactivé",
-          "on": "Activé"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Allumage automatique de la lumière de la hotte",
-        "state": {
-          "off": "Désactivé",
-          "on": "Activé"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Démarrage automatique de la hotte",

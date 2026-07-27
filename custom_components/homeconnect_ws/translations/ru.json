@@ -140,6 +140,15 @@
       "switch_oven_display_brand_logo": {
         "name": "Отобразить логотип бренда"
       },
+      "switch_hob_energy_consumption_indication": {
+        "name": "Индикация энергопотребления"
+      },
+      "switch_hob_hood_automatic_light_off": {
+        "name": "Автоматическое выключение подсветки вытяжки"
+      },
+      "switch_hob_hood_automatic_light_on": {
+        "name": "Автоматическое включение подсветки вытяжки"
+      },
       "switch_refrigerator_sabbath_mode": {
         "name": "Режим Шаббат"
       },
@@ -1623,13 +1632,6 @@
           "keylockfunctiondeactivated": "Деактивировано"
         }
       },
-      "select_hob_energy_consumption_indication": {
-        "name": "Индикация энергопотребления",
-        "state": {
-          "indicationoff": "Скрыть",
-          "indicationon": "Показать"
-        }
-      },
       "select_hob_bridge_zone_mode": {
         "name": "Вариоиндукция",
         "state": {
@@ -1639,20 +1641,6 @@
       },
       "select_hob_power_level": {
         "name": "Уровень мощности"
-      },
-      "select_hob_hood_automatic_light_off": {
-        "name": "Автоматическое выключение подсветки вытяжки",
-        "state": {
-          "off": "Выкл",
-          "on": "Вкл"
-        }
-      },
-      "select_hob_hood_automatic_light_on": {
-        "name": "Автоматическое включение подсветки вытяжки",
-        "state": {
-          "off": "Выкл",
-          "on": "Вкл"
-        }
       },
       "select_hob_hood_automatic_start": {
         "name": "Автоматический запуск вытяжки",
