@@ -458,6 +458,15 @@ DEVICE_DESCRIPTION = DeviceDescription(
             execution=Execution.START_ONLY,
         ),
         EntityDescription(
+            uid=506,
+            name="Test.Program.Program4",
+            options=[
+                OptionDescription(access=Access.READ_WRITE, available=True, refUID=401),
+                OptionDescription(access=Access.READ_WRITE, available=True, refUID=402),
+            ],
+            execution=Execution.SELECT_ONLY,
+        ),
+        EntityDescription(
             uid=502,
             name="BSH.Common.Program.Favorite.001",
             available=True,

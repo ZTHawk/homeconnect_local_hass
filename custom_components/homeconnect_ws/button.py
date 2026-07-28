@@ -54,9 +54,10 @@ class HCStartButton(HCEntity, ButtonEntity):
         available = super().available
         available &= self._runtime_data.appliance.selected_program is not None
         if self._runtime_data.appliance.selected_program is not None:
-            available &= (
-                self._runtime_data.appliance.selected_program.execution
-                == Execution.SELECT_AND_START
+            # SELECT_ONLY needs this button too - see generate_start_button.
+            available &= self._runtime_data.appliance.selected_program.execution in (
+                Execution.SELECT_AND_START,
+                Execution.SELECT_ONLY,
             )
         return available
 

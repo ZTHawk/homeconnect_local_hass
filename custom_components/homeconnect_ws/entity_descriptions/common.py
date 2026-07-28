@@ -56,9 +56,19 @@ POWER_OFF_STATE_NAMES = ("Off", "MainsOff")
 
 def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription | None:
     """Get Start Button description."""
+    # SELECT_ONLY needs this button just as much as SELECT_AND_START: selecting
+    # a program (writing SelectedProgram) only stages it and its options on
+    # these appliances, it doesn't start anything - a separate write to
+    # ActiveProgram is what actually starts it, and Program.start() already
+    # posts there unconditionally regardless of execution type. Confirmed
+    # live on fork issue #21 via the official cloud integration's own debug
+    # log: "PUT .../programs/active {'key': '<program>'}" is the literal
+    # start action, distinct from the earlier "PUT .../programs/selected"
+    # that only configured options.
     programs = list(
         filter(
-            lambda program: program.execution == Execution.SELECT_AND_START,
+            lambda program: program.execution
+            in (Execution.SELECT_AND_START, Execution.SELECT_ONLY),
             appliance.programs.values(),
         )
     )
