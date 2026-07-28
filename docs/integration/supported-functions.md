@@ -40,15 +40,62 @@ Some entites are excluded from this integration on purpose, even though the Home
 
 ## Dishwasher
 
-Wash program selection and options (half load, hygiene plus, extra dry, extra rinse, speed-on-demand, silence-on-demand, sanitize), FlexSpray zone configuration, rinse aid and salt level sensors, maintenance reminders (filter check, machine care, smart filter), water hardness and rinse aid dose settings, auto power off, and time light (floor projector).
+- Wash program selection and options
+  - Half load, hygiene plus, extra dry, extra rinse, speed-on-demand, silence-on-demand, sanitize
+- FlexSpray zone configuration
+  - Configure which FlexSpray zones are active for a wash
+- Rinse aid and salt level sensors
+  - Reports remaining rinse aid and salt levels
+- Maintenance reminders
+  - Filter check, machine care, smart filter
+- Water hardness and rinse aid dose settings
+  - Configure water hardness and how much rinse aid is dispensed
+- Auto power off
+  - Automatically turns the dishwasher off after a cycle finishes
+- Time light (floor projector)
+  - Projects the remaining time onto the floor
 
 ## Washing Machine / Dryer
 
-Program options including temperature, spin speed, prewash, rinse plus, gentle cycle, and hygienic steam; iDos automatic dosing (levels 1 & 2); drum light and door ring LED control (brightness and color mode); anti-wrinkle guard; maintenance reminders (drum clean, lint filter full); condensate container alert (dryer).
+- Program options
+  - Temperature, spin speed, prewash, rinse plus, gentle cycle, hygienic steam
+- iDos automatic dosing (levels 1 & 2)
+  - Automatic detergent dosing levels
+- Drum light and door ring LED control
+  - Brightness and color mode
+- Anti-wrinkle guard
+  - Keeps tumbling laundry after a cycle ends to prevent wrinkles
+- Maintenance reminders
+  - Drum clean, lint filter full
+- Condensate container alert (dryer)
+  - Alerts when the condensate/water container needs emptying
 
 ## Oven
 
-Oven current and setpoint temperature, meat probe temperature and plugged-in status, heating mode selection, fast preheat, sabbath mode, convection conversion, dim display on standby, clock display (analogue/digital), night-time display dimming, sound volume, telescopic slide-out rail, and brand logo display
+- Oven current and setpoint temperature
+  - Live cavity temperature and the target temperature
+- Meat probe temperature and plugged-in status
+  - Live meat probe reading and whether it's plugged in
+- Heating mode selection
+  - Choose the oven's heating mode (e.g. top/bottom heat, convection)
+- Fast preheat
+  - Speeds up preheating to the target temperature
+- Sabbath mode
+  - Disables automatic timers/notifications for Sabbath observance
+- Convection conversion
+  - Automatically adjusts temperature/time when converting a recipe to convection
+- Dim display on standby
+  - Dims the oven's display when idle
+- Clock display (analogue/digital)
+  - Switch the oven's clock face between analogue and digital
+- Night-time display dimming
+  - Dims the display further during a configured night-time window
+- Sound volume
+  - Volume of the oven's button/alert sounds
+- Telescopic slide-out rail
+  - Controls/reports the telescopic rack rail
+- Brand logo display
+  - Toggle whether the brand logo shows on the display
 
 ## Hob
 
@@ -79,12 +126,55 @@ Oven current and setpoint temperature, meat probe temperature and plugged-in sta
 
 ## Hood
 
-Hood fan speed control, ambient and work lighting, automatic shutoff delay, interval ventilation, grease and carbon filter saturation sensors and one-tap reset buttons
+- Hood fan speed control
+  - Set the fan speed/stage
+- Ambient and work lighting
+  - Control the hood's ambient and work lights
+- Automatic shutoff delay
+  - Keeps the fan running for a set time after being turned off
+- Interval ventilation
+  - Periodically runs the fan for a short interval
+- Grease and carbon filter saturation sensors and one-tap reset buttons
+  - Reports filter saturation and lets you reset the counter after cleaning/replacing
 
 ## Coffee Maker
 
-Bean container and amount, grind coarseness, coffee strength, temperature, brew size, shot count, milk ratio; cup warmer; maintenance countdowns for cleaning, descaling, and water filter replacement; water tank and drip tray level sensors; per-drink brew counters (coffee, espresso, milk-based drinks, and more).
+- Bean container and amount
+  - Remaining bean level
+- Grind coarseness
+  - Coffee grind coarseness setting
+- Coffee strength
+  - Brew strength setting
+- Temperature
+  - Brew temperature setting
+- Brew size
+  - Cup/brew size setting
+- Shot count
+  - Number of espresso shots
+- Milk ratio
+  - Milk-to-coffee ratio for milk-based drinks
+- Cup warmer
+  - Turn the cup warmer plate on or off
+- Maintenance countdowns
+  - Cleaning, descaling, water filter replacement
+- Water tank and drip tray level sensors
+  - Reports water tank and drip tray fill/empty state
+- Per-drink brew counters
+  - Coffee, espresso, milk-based drinks, and more
 
 ## Refrigerator / Freezer
 
-Fridge, freezer, and chiller setpoint temperatures (°C and °F); door open and door alarm binary sensors; super-freeze and super-cool modes; eco, vacation, and fresh-food modes; interior light with brightness control; water filter alert; sabbath mode duration.
+- Fridge, freezer, and chiller setpoint temperatures (°C and °F)
+  - Set and monitor target temperatures per compartment
+- Door open and door alarm binary sensors
+  - Reports whether a door is open, and whether the door-open alarm is active
+- Super-freeze and super-cool modes
+  - Temporarily maximizes cooling for fresh loads
+- Eco, vacation, and fresh-food modes
+  - Preset operating modes for efficiency, extended absence, or fresh food
+- Interior light with brightness control
+  - Control the interior light and its brightness
+- Water filter alert
+  - Alerts when the water filter needs replacing
+- Sabbath mode duration
+  - How long Sabbath mode stays active
