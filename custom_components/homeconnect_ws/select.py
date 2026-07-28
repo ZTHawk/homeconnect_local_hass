@@ -45,33 +45,34 @@ class HCSelect(HCEntity, SelectEntity):
     """Select Entity."""
 
     entity_description: HCSelectEntityDescription
-    _rev_options: dict[str, str]
 
-    def __init__(
-        self,
-        entity_description: HCSelectEntityDescription,
-        runtime_data: HCData,
-    ) -> None:
-        super().__init__(entity_description, runtime_data)
+    @property
+    def _rev_options(self) -> dict[str, str]:
+        """Lowercased value -> real enum value, only meaningful with has_state_translation."""
+        if not self.entity_description.has_state_translation:
+            return {}
+        if self._entity is None or not self._entity.enum:
+            return {}
+        return {str(value).lower(): value for value in self._settable_enum_values()}
 
-        self._rev_options = {}
-        if entity_description.options:
-            self._attr_options = entity_description.options
-        elif self._entity is not None and self._entity.enum:
+    @property
+    def options(self) -> list[str]:
+        # Computed live rather than cached once at __init__: unlike a
+        # Setting, an Option entity's enum isn't guaranteed to be populated
+        # yet by the time entities are constructed (confirmed live on fork
+        # issue #17 - HA's own SelectEntity.options raises AttributeError,
+        # which kills entity registration outright, if neither this nor
+        # entity_description.options is ever set). Falling back to an empty
+        # list here is safe either way: current_option already treats
+        # anything not in this list as unavailable/None.
+        if self.entity_description.options:
+            return self.entity_description.options
+        if self._entity is not None and self._entity.enum:
             enum_values = self._settable_enum_values()
-            self._attr_options = []
             if self.entity_description.has_state_translation:
-                for value in enum_values:
-                    self._attr_options.append(str(value).lower())
-            else:
-                for value in enum_values:
-                    self._attr_options.append(str(value))
-
-        if self.entity_description.has_state_translation and (
-            self._entity is not None and self._entity.enum
-        ):
-            for value in self._settable_enum_values():
-                self._rev_options[str(value).lower()] = value
+                return [str(value).lower() for value in enum_values]
+            return [str(value) for value in enum_values]
+        return []
 
     def _settable_enum_values(self) -> list[str]:
         """Return enum values allowed by the appliance min/max range."""
@@ -99,10 +100,10 @@ class HCSelect(HCEntity, SelectEntity):
             return None
         if self.entity_description.has_state_translation:
             value = str(self._entity.value).lower()
-            if value in self._attr_options:
+            if value in self.options:
                 return value
         value = str(self._entity.value)
-        if value in self._attr_options:
+        if value in self.options:
             return value
         return None
 
@@ -182,6 +183,18 @@ class HCProgram(HCSelect):
     async def async_select_option(self, option: str) -> None:
         selected_program = self._runtime_data.appliance.programs[self._rev_programs[option]]
         if selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
-            await selected_program.select()
+            # override_options=True (send no options) rather than merging in
+            # each option's current shared value: a single option UID can have
+            # a different valid range depending on which program last set it
+            # (confirmed live on fork issues #9/#21 - the same UID sent 160 in
+            # a stale, out-of-range value from a previous program and got a
+            # 400, but 80 - a value actually valid for the new program -
+            # succeeded). The official cloud API selects programs with an
+            # empty options list for exactly this reason, letting the
+            # appliance apply its own per-program defaults instead. Only
+            # start()'s START_ONLY path (see issue #14) actually needs the
+            # opposite - some options there have no safe appliance-side
+            # default at all - so this doesn't touch that branch.
+            await selected_program.select(override_options=True)
         elif selected_program.execution == Execution.START_ONLY:
             await selected_program.start()
