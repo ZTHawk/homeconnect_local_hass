@@ -154,20 +154,35 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         """
         Whether being disconnected right now is expected, not a fault.
 
-        True for appliance types confirmed to legitimately cut their own WiFi
-        (EXPECTED_OFFLINE_APPLIANCE_TYPES), unless the *most recent* close
-        code is positively known to be something other than a clean code-1000
-        closure. No close code observed yet at all (None) also counts as
-        expected here, not just 1000 - a fresh HA restart rebuilds the
-        session from scratch, wiping last_close_code back to None before this
-        process has ever connected, which otherwise made every entity show
-        Unavailable on restart whenever the appliance simply happened to be
-        off (confirmed live on fork issue #7). These appliance types are
-        already treated as "unreachable is normal" everywhere else (no setup
-        blocking, debug-only connect-failure logging), so a restart
-        shouldn't be the one place that starts them out looking broken.
+        True only while actually disconnected, for appliance types confirmed
+        to legitimately cut their own WiFi (EXPECTED_OFFLINE_APPLIANCE_TYPES),
+        unless the *most recent* close code is positively known to be
+        something other than a clean code-1000 closure. No close code
+        observed yet at all (None) also counts as expected here, not just
+        1000 - a fresh HA restart rebuilds the session from scratch, wiping
+        last_close_code back to None before this process has ever connected,
+        which otherwise made every entity show Unavailable on restart
+        whenever the appliance simply happened to be off (confirmed live on
+        fork issue #7). These appliance types are already treated as
+        "unreachable is normal" everywhere else (no setup blocking,
+        debug-only connect-failure logging), so a restart shouldn't be the
+        one place that starts them out looking broken.
+
+        The explicit `not session.connected` check matters: home_disconnect
+        resets last_close_code back to None the moment a new connection
+        succeeds (so a stale code from a past disconnect doesn't linger), but
+        that means last_close_code alone can't distinguish "actually
+        offline, and it's expected" from "fully connected right now" - both
+        show up as None. Without this check, force_off_when_expected_offline/
+        force_option_when_expected_offline/clear_on_expected_offline (switch,
+        select, sensor, number) would force their placeholder value
+        constantly, even while connected and receiving live updates -
+        confirmed live on fork issue #21 (Power switch/PowerState sensor
+        stuck at Off on an always-online washer).
         """
         if self._escalate_connectivity_logging:
+            return False
+        if self.appliance.session.connected:
             return False
         return self.appliance.session.last_close_code in {None, 1000}
 

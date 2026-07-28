@@ -123,6 +123,7 @@ async def test_washer_expected_offline_on_fresh_restart(
     description["info"]["type"] = "Washer"
     appliance = MockAppliance(description, "host", "mock_app", "mock_app_id", "PSK_KEY")
     appliance.session.connect = AsyncMock(side_effect=ConnectionFailedError)
+    appliance.session.connected = False
     appliance.session.last_close_code = None
     appliance_mock = Mock(return_value=appliance)
     monkeypatch.setattr(coordinator, "HomeAppliance", appliance_mock)
@@ -143,6 +144,18 @@ async def test_washer_expected_offline_on_fresh_restart(
 
     # A confirmed non-clean close code still correctly reports as not expected.
     appliance.session.last_close_code = 1006
+    assert coord.expected_offline is False
+
+    # Actually connected must never read as expected_offline, regardless of
+    # last_close_code - confirmed live on fork issue #21: home_disconnect
+    # resets last_close_code back to None the moment a connection succeeds,
+    # so a fully-connected, always-online washer was getting force_off_*/
+    # clear_on_expected_offline entities (switch_power_state,
+    # sensor_power_state, ...) stuck at their offline placeholder forever.
+    appliance.session.connected = True
+    appliance.session.last_close_code = None
+    assert coord.expected_offline is False
+    appliance.session.last_close_code = 1000
     assert coord.expected_offline is False
 
 
