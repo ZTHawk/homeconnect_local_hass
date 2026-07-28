@@ -1,0 +1,88 @@
+# Adding a new Entity
+
+New entities are added by adding an entity description in `entity_descriptions/[device type].py` (e.g. `cooking.py`, `dishcare.py`, `laundry_care.py`, `refrigeration.py`, `consumer_products.py`, or the shared `common.py`). See the [HA documentation on entity descriptions](https://developers.home-assistant.io/docs/core/entity?_highlight=description#entity-description) for the base concept.
+
+This integration's entity classes are subclasses of the corresponding [HA Entity](https://developers.home-assistant.io/docs/core/entity) type. The description dataclasses (in `entity_descriptions/descriptions_definitions.py`) extend HA's own `*EntityDescription` for each platform with HC-specific fields. Base HA fields (`device_class`, `entity_category`, `native_min_value`, `native_max_value`, etc.) still apply and aren't repeated here — see the corresponding HA docs.
+
+## Base Entity (`HCEntityDescription`)
+
+Fields common to every entity type:
+
+- `entity`: the name of the HC entity, e.g. `"BSH.Common.Status.DoorState"`
+- `entities`: for entity types that watch more than one HC entity
+- `available_access`: which `Access` values (`READ`, `READ_WRITE`, `WRITE_ONLY`) count as "available"; each platform sets its own sensible default
+- `extra_attributes`: list of dicts mapping an attribute `name` to an HC `entity` (and optionally a `value_fn`) to expose as extra state attributes, e.g.
+
+  ```python
+  extra_attributes=[
+      {
+          "name": "Is Estimated",
+          "entity": "BSH.Common.Option.RemainingProgramTimeIsEstimated",
+      }
+  ],
+  ```
+
+- `clear_on_expected_offline`: for laundry appliances only — clears the entity's value to `None` instead of showing a stale reading while the appliance is in its expected-offline window (see [Known Limitations](../integration/support-and-troubleshooting.md#known-limitations) on the code-1000 clean-disconnect behavior)
+
+## Select Entity (`HCSelectEntityDescription`)
+
+- `has_state_translation`: set `True` if state translation strings are available
+- `mapping`: dict mapping the HC program/option name to a display value (used by `HCProgram`)
+- `force_option_when_expected_offline`: forces `current_option` to this value while the appliance is in its expected-offline window, instead of trusting a possibly-stale last-known value
+
+> [!NOTE]
+> `options` on `HCSelect` is computed live via a `@property`, not cached once at `__init__` — an `Option` entity's `.enum` isn't guaranteed to be populated by the time entities are constructed (unlike a `Setting`, which is static from the profile). Caching it once caused a hard crash on entity registration (`AttributeError` from HA core's own `SelectEntity.options`) the first time this was tried. If you're adding a new select and it isn't populated yet at startup, this is why — don't reintroduce an `__init__`-time cache without handling that case.
+
+## Switch Entity (`HCSwitchEntityDescription`)
+
+- `value_mapping`: mapping for non-boolean on/off values, e.g. `("On", "Off")`
+- `force_off_when_expected_offline`: same idea as the select's `force_option_when_expected_offline`, but for a 2-state switch
+
+## Sensor Entity (`HCSensorEntityDescription`)
+
+- `has_state_translation`: set `True` if state translation strings are available
+- `mapping`: dict mapping raw HC values to display values
+- `force_option_when_expected_offline`: same idea as the select's field, for a read-only enum sensor
+
+## Binary Sensor Entity (`HCBinarySensorEntityDescription`)
+
+- `value_on`: set of values for which the sensor should be `on`, e.g. `{"Open", "Ajar"}`
+- `value_off`: set of values for which the sensor should be `off`, e.g. `{"Closed", "Locked"}`
+
+## Number Entity (`HCNumberEntityDescription`)
+
+No HC-specific extra fields — use HA's own inherited `NumberEntityDescription` fields (`native_min_value`, `native_max_value`, `native_step`, etc.) directly, e.g. `native_max_value=99` to cap a value below what the appliance profile itself allows.
+
+## Light Entity (`HCLightEntityDescription`)
+
+- `brightness_entity`, `color_temperature_entity`, `color_entity`, `color_mode_entity`: names of the HC entities backing each of these light capabilities, when they're separate from the main `entity`
+
+## Fan Entity (`HCFanEntityDescription`)
+
+- `default_program`: the HC program name to start when the fan is turned on without an explicit speed/preset
+
+## Update Entity (`HCUpdateEntityDescription`)
+
+- `command_entity`: the HC entity used to trigger the install/download command
+
+## Button, Event Sensor, and other types
+
+- **Button** (`HCButtonEntityDescription`): no extra fields beyond the base ones.
+- **Event Sensor**: turns multiple HC events into a single sensor. Required fields: `entities` (list of event entities, evaluated top to bottom until one is set) and `options` (list of display values, one more than the number of `entities` — the last option is the fallback when none are set).
+
+## Development Options
+
+This integration has development-only options for use with the [HomeConnect Websocket Simulator](https://github.com/chris-mc1/homeconnect_ws_sim/). Set these in `configuration.yaml`:
+
+```yaml
+homeconnect_ws:
+  # Allow creating new config entries from a Diagnostics dump
+  setup_from_dump_enabled: True
+
+  # Override the host in the config flow.
+  override_host: "192.168.0.10"
+
+  # Override the encryption key in the config flow. Encryption mode is
+  # also forced to "TLS". Use together with the Simulator's "--psk" CLI arg.
+  override_psk: "PSK_KEY"
+```
