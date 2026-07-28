@@ -88,6 +88,13 @@ class HCSensor(HCEntity, SensorEntity):
         if (
             self.entity_description.force_option_when_expected_offline is not None
             and self._runtime_data.coordinator.expected_offline
+            # See HCSelect.current_option - only force to a value this
+            # appliance's own enum actually has.
+            and (
+                self._attr_options is None
+                or self.entity_description.force_option_when_expected_offline
+                in self._attr_options
+            )
         ):
             return self.entity_description.force_option_when_expected_offline
         if self._entity is None or self._entity.value is None:

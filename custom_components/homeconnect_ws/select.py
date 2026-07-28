@@ -94,6 +94,13 @@ class HCSelect(HCEntity, SelectEntity):
         if (
             self.entity_description.force_option_when_expected_offline is not None
             and self._runtime_data.coordinator.expected_offline
+            # A static entity description can't know every appliance model's
+            # actual enum in advance - only force to a value this appliance
+            # genuinely has, or SelectEntity.state silently degrades to
+            # "Unknown" for models missing it (confirmed live on fork issue
+            # #7 for the dynamically-generated PowerState case; this guards
+            # the same failure mode for statically-declared descriptions).
+            and self.entity_description.force_option_when_expected_offline in self.options
         ):
             return self.entity_description.force_option_when_expected_offline
         if self._entity is None:

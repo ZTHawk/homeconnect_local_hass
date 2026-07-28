@@ -281,6 +281,7 @@ async def test_power_state_forced_when_expected_offline() -> None:
     appliance = MagicMock()
     appliance.info = {"deviceID": "test_device_id"}
     appliance.entities["Test.PowerState"].value = "On"
+    appliance.entities["Test.PowerState"].enum = {"0": "On", "1": "Off"}
     runtime_data = HCData(
         appliance=appliance,
         device_info=MagicMock(),
@@ -303,6 +304,7 @@ async def test_power_state_not_forced_when_not_expected_offline() -> None:
     appliance = MagicMock()
     appliance.info = {"deviceID": "test_device_id"}
     appliance.entities["Test.PowerState"].value = "On"
+    appliance.entities["Test.PowerState"].enum = {"0": "On", "1": "Off"}
     runtime_data = HCData(
         appliance=appliance,
         device_info=MagicMock(),
@@ -318,6 +320,34 @@ async def test_power_state_not_forced_when_not_expected_offline() -> None:
     entity = HCSensor(entity_description, runtime_data)
 
     assert entity.native_value == "on"
+
+
+async def test_power_state_not_forced_when_value_not_a_real_option() -> None:
+    """
+    A static entity description can't assume every appliance model has the forced value.
+
+    See test_current_option_not_forced_when_value_not_a_real_option in
+    test_select.py - same guard, same reasoning, for the sensor mirror.
+    """
+    appliance = MagicMock()
+    appliance.info = {"deviceID": "test_device_id"}
+    appliance.entities["Test.SpinSpeed"].value = "RPM1400"
+    appliance.entities["Test.SpinSpeed"].enum = {"0": "RPM800", "1": "RPM1400"}
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=True),
+    )
+    entity_description = HCSensorEntityDescription(
+        key="sensor_laundry_spin_speed",
+        entity="Test.SpinSpeed",
+        has_state_translation=True,
+        force_option_when_expected_offline="off",
+    )
+    entity = HCSensor(entity_description, runtime_data)
+
+    assert entity.native_value == "rpm1400"
 
 
 async def test_active_program_cleared_when_expected_offline() -> None:

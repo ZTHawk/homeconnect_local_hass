@@ -388,6 +388,36 @@ async def test_current_option_not_forced_when_not_expected_offline() -> None:
     assert entity.current_option is None
 
 
+async def test_current_option_not_forced_when_value_not_a_real_option() -> None:
+    """
+    A static entity description can't assume every appliance model has the forced value.
+
+    Confirmed live on fork issue #7 for the dynamically-generated PowerState
+    case: forcing to a value that isn't actually one of this appliance's
+    options makes SelectEntity.state silently degrade to "Unknown" instead
+    of showing anything meaningful. Statically-declared descriptions (e.g.
+    select_laundry_spin_speed's force_option_when_expected_offline="off")
+    need the same guard, since not every model is guaranteed to have that
+    exact option.
+    """
+    appliance = MagicMock()
+    appliance.info = {"deviceID": "test_device_id"}
+    runtime_data = HCData(
+        appliance=appliance,
+        device_info=MagicMock(),
+        available_entity_descriptions=MagicMock(),
+        coordinator=MagicMock(expected_offline=True),
+    )
+    entity_description = HCSelectEntityDescription(
+        key="select_laundry_spin_speed",
+        options=["rpm800", "rpm1200", "rpm1400"],
+        force_option_when_expected_offline="off",
+    )
+    entity = HCSelect(entity_description, runtime_data)
+
+    assert entity.current_option is None
+
+
 async def test_options_does_not_crash_when_enum_not_yet_populated() -> None:
     """
     Confirmed live on fork issue #17.
