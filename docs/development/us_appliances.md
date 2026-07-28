@@ -16,7 +16,14 @@ include both suffixes.
   hoods; stop by setting VentingLevel to FanOff on the active venting program.
 - `is_on` should treat `active_program is None` as off (VentingLevel can be
   stale briefly after program end).
-- Hood power switch can return 400 while venting; fan entity is the control path.
+- A hood power switch was hidden for a while (any hood with a `Hood.Venting`
+  program) on the assumption toggling it could 400 while venting - the
+  actual reproduced 400 (fork issue #14) was on `select.select_option`
+  re-activating the Venting program via `/ro/activeProgram`, a different
+  resource from the switch's `PowerState` write (`/ro/values`), and never
+  confirmed against the switch itself. Removed after a second hood owner
+  (fork issue #26) couldn't reproduce the original bug and lost a working,
+  automation-friendly entity to an unconfirmed blanket workaround.
 
 ## Hood DelayedShutOffStage
 

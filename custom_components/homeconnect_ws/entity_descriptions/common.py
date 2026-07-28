@@ -84,8 +84,6 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
     """Get Power switch description."""
     entity_descriptions = EntityDescriptions()
     if entity := appliance.entities.get("BSH.Common.Setting.PowerState"):
-        # Hood power toggles return 400 while venting; fan entity controls the hood.
-        skip_switch = "Cooking.Common.Program.Hood.Venting" in appliance.programs
         entity_min = getattr(entity, "min", None)
         entity_max = getattr(entity, "max", None)
         if entity_min is not None and entity_max is not None:
@@ -97,7 +95,7 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
         else:
             settable_states = set((entity.enum or {}).values())
 
-        if len(settable_states) == 2 and not skip_switch:
+        if len(settable_states) == 2:
             # only two power states
             for mapping in POWER_SWITCH_VALUE_MAPINGS:
                 if settable_states == set(mapping):

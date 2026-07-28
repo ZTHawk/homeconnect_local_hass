@@ -176,6 +176,49 @@ async def test_power_switch(mock_homeconnect_appliance: MockApplianceType) -> No
     assert switch_description["sensor"][0].force_option_when_expected_offline is None
 
 
+async def test_power_switch_present_on_venting_hood(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """
+    A hood with a Venting program must still get a power switch.
+
+    Confirmed live on fork issue #26 (a second hood owner, distinct from
+    #14's) - a previous fix for a 400 reproduced on select.select_option
+    re-activating Venting (a write to a different resource entirely,
+    /ro/activeProgram, not this switch's /ro/values PowerState write) hid
+    the switch for every hood with venting capability, permanently, not
+    just while actually venting - never confirmed against the switch
+    itself. That cost every venting-capable hood a working, automation-
+    friendly entity for a bug that wasn't shown to involve it.
+    """
+    device_description = POWER_SWITCH.copy()
+    device_description["setting"][0]["min"] = 1
+    device_description["setting"][0]["max"] = 2
+    device_description["setting"][0]["enumeration"] = {
+        "0": "MainsOff",
+        "1": "Off",
+        "2": "On",
+        "3": "Standby",
+    }
+    device_description["program"] = [
+        {
+            "uid": 900,
+            "name": "Cooking.Common.Program.Hood.Venting",
+            "available": True,
+        },
+    ]
+    appliance = await mock_homeconnect_appliance(description=device_description)
+    switch_description = generate_power_switch(appliance)
+
+    assert switch_description["switch"][0] == HCSwitchEntityDescription(
+        key="switch_power_state",
+        entity="BSH.Common.Setting.PowerState",
+        device_class=SwitchDeviceClass.SWITCH,
+        value_mapping=("On", "Off"),
+        force_off_when_expected_offline=True,
+    )
+
+
 HOOD_LIGHT = {
     "setting": [
         {
