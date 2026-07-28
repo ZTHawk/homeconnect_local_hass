@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/github/downloads/vemboy200/homeconnect_local_hass/total?label=downloads)](https://github.com/vemboy200/homeconnect_local_hass/releases)
 
 > [!NOTE]
-> This README covers the basics. For everything else (installation details, troubleshooting, automation examples, supported functions) see the [docs folder](docs/README.md).
+> This README covers the basics. For everything else (installation details, troubleshooting, automation examples, supported functions) see the [docs folder](docs).
 
 The **Home Connect Local** allows users to integrate their home appliances supporting the [Home Connect](https://www.home-connect.com/global) standard for Bosch and Siemens using direct communication over the local network.
 
