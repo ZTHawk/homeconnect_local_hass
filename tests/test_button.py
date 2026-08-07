@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
 from home_disconnect.message import Action, Message
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.button import SERVICE_PRESS
 from homeassistant.const import ATTR_ENTITY_ID, ATTR_FRIENDLY_NAME
+from homeassistant.exceptions import HomeAssistantError
 
 from . import setup_config_entry
 from .const import MOCK_CONFIG_DATA
@@ -104,6 +106,56 @@ async def test_start_available_for_select_only_program(
             },
         )
     )
+
+
+async def test_start_stays_available_when_remote_start_not_allowed(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+) -> None:
+    """
+    The start button must stay visible/pressable even when remote start is currently refused.
+
+    BSH.Common.Status.RemoteControlStartAllowed can only ever be flipped by a
+    human physically at the appliance - no client, local or cloud, can set it
+    remotely. Gating the button's availability on it made an expected, common
+    appliance state look like an integration bug instead of a silently
+    greyed-out button. async_press() is responsible for surfacing that state
+    instead (see the test below).
+    """
+    entity_id = "button.fake_brand_homeappliance_activeprogram"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
+    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "read"})
+    await hass.async_block_till_done()
+
+    state = hass.states.get(entity_id)
+    assert state
+    assert state.state != "unavailable"
+
+
+async def test_start_raises_when_remote_start_not_allowed(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+) -> None:
+    """Pressing start while remote start isn't allowed must error, not silently no-op."""
+    entity_id = "button.fake_brand_homeappliance_activeprogram"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
+    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "read"})
+    await hass.async_block_till_done()
+
+    with pytest.raises(HomeAssistantError) as exc_info:
+        await hass.services.async_call(
+            domain=BUTTON_DOMAIN,
+            service=SERVICE_PRESS,
+            service_data={ATTR_ENTITY_ID: entity_id},
+            blocking=True,
+        )
+
+    assert exc_info.value.translation_key == "remote_start_not_allowed"
+    mock_appliance.session.send_sync.assert_not_awaited()
 
 
 async def test_abort(

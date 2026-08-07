@@ -323,7 +323,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_remote_start_allowed",
             entity="BSH.Common.Status.RemoteControlStartAllowed",
-            entity_registry_enabled_default=False,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
         HCBinarySensorEntityDescription(
@@ -377,7 +376,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="select_remote_control_level",
             entity="BSH.Common.Setting.RemoteControlLevel",
             entity_category=EntityCategory.CONFIG,
-            entity_registry_enabled_default=False,
             has_state_translation=True,
         ),
         # cleanup: duplicate select_remote_control_level entry removed
