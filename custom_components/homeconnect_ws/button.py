@@ -10,7 +10,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
 from .entity import HCEntity
-from .helpers import create_entities, entity_is_available, error_decorator
+from .helpers import create_entities, error_decorator
 
 if TYPE_CHECKING:
     from home_disconnect.entities import ActiveProgram, Command
@@ -80,7 +80,17 @@ class HCStartButton(HCEntity, ButtonEntity):
         selected_program = self._runtime_data.appliance.selected_program
         if selected_program is None:
             return
-        if not entity_is_available(self._entity, self.entity_description.available_access):
+        # Check BSH.Common.Status.RemoteControlStartAllowed directly rather than
+        # ActiveProgram's own access field: ActiveProgram.access is "read" (not
+        # writable) whenever the appliance can't currently accept a start for
+        # *any* reason - remote start not confirmed, but equally an open door,
+        # no program selected on the appliance side, etc. Confusing those would
+        # tell a user to go press the physical confirmation button for a
+        # problem physically confirming can't fix (e.g. an open door).
+        remote_start_allowed = self._runtime_data.appliance.entities.get(
+            "BSH.Common.Status.RemoteControlStartAllowed"
+        )
+        if remote_start_allowed is not None and remote_start_allowed.value is False:
             device_name = self._runtime_data.device_info.get("name", "your appliance")
             raise HomeAssistantError(
                 translation_domain=DOMAIN,

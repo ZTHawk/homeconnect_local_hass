@@ -252,6 +252,12 @@ DEVICE_DESCRIPTION = DeviceDescription(
             available=True,
             access=Access.READ,
         ),
+        EntityDescription(
+            uid=106,
+            name="BSH.Common.Status.RemoteControlStartAllowed",
+            available=True,
+            access=Access.READ,
+        ),
     ],
     setting=[
         EntityDescription(

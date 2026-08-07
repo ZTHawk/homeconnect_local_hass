@@ -126,7 +126,12 @@ async def test_start_stays_available_when_remote_start_not_allowed(
     entity_id = "button.fake_brand_homeappliance_activeprogram"
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
     await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
-    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "read"})
+    await mock_appliance.entities["BSH.Common.Status.RemoteControlStartAllowed"].update(
+        {"value": False}
+    )
+    # The button only registers a callback on its own entity (ActiveProgram), not
+    # on SelectedProgram - nudge it so HA's cached state actually recomputes.
+    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "readwrite"})
     await hass.async_block_till_done()
 
     state = hass.states.get(entity_id)
@@ -143,7 +148,9 @@ async def test_start_raises_when_remote_start_not_allowed(
     entity_id = "button.fake_brand_homeappliance_activeprogram"
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
     await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
-    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "read"})
+    await mock_appliance.entities["BSH.Common.Status.RemoteControlStartAllowed"].update(
+        {"value": False}
+    )
     await hass.async_block_till_done()
 
     with pytest.raises(HomeAssistantError) as exc_info:
@@ -156,6 +163,41 @@ async def test_start_raises_when_remote_start_not_allowed(
 
     assert exc_info.value.translation_key == "remote_start_not_allowed"
     mock_appliance.session.send_sync.assert_not_awaited()
+
+
+async def test_start_proceeds_when_blocked_for_a_different_reason(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,  # noqa: ARG001
+) -> None:
+    """
+    Pressing start while blocked for a non-remote-start reason must not misattribute it.
+
+    ActiveProgram.access reflects whether the appliance can currently accept a
+    start for *any* reason, not just remote-start confirmation - checking it
+    directly (instead of BSH.Common.Status.RemoteControlStartAllowed) would
+    wrongly tell a user to go press a physical button that can't fix an open
+    door. Confirmed live: RemoteControlStartAllowed was already "on" but
+    ActiveProgram.access was still "read" because the door was open, and the
+    button incorrectly showed the remote-start message anyway before this fix.
+    """
+    entity_id = "button.fake_brand_homeappliance_activeprogram"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
+    await mock_appliance.entities["BSH.Common.Status.RemoteControlStartAllowed"].update(
+        {"value": True}
+    )
+    await mock_appliance.entities["Test.ActiveProgram"].update({"access": "read"})
+    await hass.async_block_till_done()
+
+    await hass.services.async_call(
+        domain=BUTTON_DOMAIN,
+        service=SERVICE_PRESS,
+        service_data={ATTR_ENTITY_ID: entity_id},
+        blocking=True,
+    )
+
+    mock_appliance.session.send_sync.assert_awaited_once()
 
 
 async def test_abort(
