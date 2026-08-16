@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING
 
 from home_disconnect.entities import Execution
 from homeassistant.components.button import ButtonEntity
+from homeassistant.exceptions import HomeAssistantError
 
+from .const import DOMAIN
 from .entity import HCEntity
 from .helpers import create_entities, error_decorator
 
@@ -51,19 +53,48 @@ class HCStartButton(HCEntity, ButtonEntity):
 
     @property
     def available(self) -> bool:
-        available = super().available
-        available &= self._runtime_data.appliance.selected_program is not None
-        if self._runtime_data.appliance.selected_program is not None:
-            # SELECT_ONLY needs this button too - see generate_start_button.
-            available &= self._runtime_data.appliance.selected_program.execution in (
-                Execution.SELECT_AND_START,
-                Execution.SELECT_ONLY,
-            )
-        return available
+        # Deliberately skips entity_is_available()'s access check (unlike
+        # HCEntity.available): keep this button visible and pressable even
+        # when the appliance is currently refusing remote start
+        # (BSH.Common.Status.RemoteControlStartAllowed is false) - that's a
+        # normal, common appliance state, not an integration bug. async_press
+        # below checks access itself and raises a clear, actionable error
+        # instead of a silently-greyed-out button, mirroring how the official
+        # Home Connect cloud integration keeps its active-program select
+        # always available regardless of remote-control state.
+        if not self._runtime_data.appliance.session.connected:
+            return False
+        if not getattr(self._entity, "available", True):
+            return False
+        selected_program = self._runtime_data.appliance.selected_program
+        if selected_program is None:
+            return False
+        # SELECT_ONLY needs this button too - see generate_start_button.
+        return selected_program.execution in (
+            Execution.SELECT_AND_START,
+            Execution.SELECT_ONLY,
+        )
 
     @error_decorator
     async def async_press(self) -> None:
         selected_program = self._runtime_data.appliance.selected_program
         if selected_program is None:
             return
+        # Check BSH.Common.Status.RemoteControlStartAllowed directly rather than
+        # ActiveProgram's own access field: ActiveProgram.access is "read" (not
+        # writable) whenever the appliance can't currently accept a start for
+        # *any* reason - remote start not confirmed, but equally an open door,
+        # no program selected on the appliance side, etc. Confusing those would
+        # tell a user to go press the physical confirmation button for a
+        # problem physically confirming can't fix (e.g. an open door).
+        remote_start_allowed = self._runtime_data.appliance.entities.get(
+            "BSH.Common.Status.RemoteControlStartAllowed"
+        )
+        if remote_start_allowed is not None and remote_start_allowed.value is False:
+            device_name = self._runtime_data.device_info.get("name") or "your appliance"
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="remote_start_not_allowed",
+                translation_placeholders={"device_name": device_name},
+            )
         await selected_program.start()

@@ -3898,6 +3898,9 @@
     "access_error": {
       "message": "Entity is not Accessible"
     },
+    "remote_start_not_allowed": {
+      "message": "Please enable remote start on {device_name} by physically going there and pressing the remote start button."
+    },
     "code_respons": {
       "message": "Error response from Appliance: {message}"
     },
