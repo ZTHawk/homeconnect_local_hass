@@ -114,6 +114,9 @@
       "switch_zeolite_dry": {
         "name": "CrystalDry"
       },
+      "switch_eco_dry_option": {
+        "name": "EfficientDry"
+      },
       "switch_extra_dry": {
         "name": "Dodatkowe suszenie"
       },
@@ -3894,6 +3897,9 @@
     },
     "access_error": {
       "message": "Encja jest niedostępna"
+    },
+    "remote_start_not_allowed": {
+      "message": "Aby włączyć zdalny start na urządzeniu {device_name}, podejdź do niego i naciśnij przycisk zdalnego startu."
     },
     "code_respons": {
       "message": "Błędna odpowiedź z urządzenia: {message}"
