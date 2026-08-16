@@ -155,6 +155,24 @@
                     "on": "mdi:snowflake-melt"
                 }
             },
+            "binary_sensor_door_alarm_chiller_common": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
+                }
+            },
+            "binary_sensor_door_alarm_freezer": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
+                }
+            },
+            "binary_sensor_door_alarm_fridge": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
+                }
+            },
             "binary_sensor_local_control_active": {
                 "default": "mdi:gesture-tap-button"
             },
