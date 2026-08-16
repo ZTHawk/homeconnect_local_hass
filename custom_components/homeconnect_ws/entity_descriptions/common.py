@@ -67,8 +67,9 @@ def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription
     # that only configured options.
     programs = list(
         filter(
-            lambda program: program.execution
-            in (Execution.SELECT_AND_START, Execution.SELECT_ONLY),
+            lambda program: (
+                program.execution in (Execution.SELECT_AND_START, Execution.SELECT_ONLY)
+            ),
             appliance.programs.values(),
         )
     )
@@ -323,7 +324,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_remote_start_allowed",
             entity="BSH.Common.Status.RemoteControlStartAllowed",
-            entity_registry_enabled_default=False,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
         HCBinarySensorEntityDescription(
@@ -377,7 +377,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="select_remote_control_level",
             entity="BSH.Common.Setting.RemoteControlLevel",
             entity_category=EntityCategory.CONFIG,
-            entity_registry_enabled_default=False,
             has_state_translation=True,
         ),
         # cleanup: duplicate select_remote_control_level entry removed

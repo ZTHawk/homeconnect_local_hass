@@ -18,10 +18,10 @@ from home_disconnect import (
     HomeAppliance,
 )
 from homeassistant.const import CONF_DESCRIPTION, CONF_DEVICE_ID, CONF_HOST
-from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -247,7 +247,20 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         if last_err is not None:
             msg += f" ({type(last_err).__name__}: {last_err})"
         msg += f" - see {TROUBLESHOOTING_URL} if this doesn't resolve on its own"
-        raise ConfigEntryNotReady(msg) from last_err
+        # UpdateFailed, not ConfigEntryNotReady: HA's own
+        # async_config_entry_first_refresh() already converts a failed setup
+        # into ConfigEntryNotReady for us. Raising ConfigEntryNotReady
+        # ourselves from inside _async_setup doesn't get treated as an
+        # expected setup failure by __wrap_async_setup (it isn't a
+        # ConfigEntryError subclass) - it falls into the generic except
+        # Exception branch instead, which logs a full ERROR-level traceback
+        # via "Unexpected error fetching %s data" on *every single retry*
+        # while the appliance stays unreachable, before HA discards it and
+        # raises its own ConfigEntryNotReady anyway. Confirmed live on fork
+        # issue #30 (an oven unreachable for an extended period produced
+        # dozens of these). UpdateFailed is handled quietly and still ends
+        # up as ConfigEntryNotReady with this as __cause__.
+        raise UpdateFailed(msg) from last_err
 
     async def _connect(self) -> None:
         self.logger.debug(

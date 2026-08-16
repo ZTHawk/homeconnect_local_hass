@@ -10,6 +10,9 @@
             "switch_extra_dry_option": {
                 "default": "mdi:heat-wave"
             },
+            "switch_eco_dry_option": {
+                "default": "mdi:heat-wave"
+            },
             "switch_intensiv_zone": {
                 "default": "mdi:pot-steam"
             },
@@ -213,6 +216,22 @@
                 "default": "mdi:water-outline",
                 "state": {
                     "on": "mdi:water-alert"
+            "binary_sensor_door_alarm_chiller_common": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
+                }
+            },
+            "binary_sensor_door_alarm_freezer": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
+                }
+            },
+            "binary_sensor_door_alarm_fridge": {
+                "default": "mdi:door",
+                "state": {
+                    "on": "mdi:door-open"
                 }
             },
             "binary_sensor_local_control_active": {
