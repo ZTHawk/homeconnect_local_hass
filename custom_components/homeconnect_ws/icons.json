@@ -216,6 +216,8 @@
                 "default": "mdi:water-outline",
                 "state": {
                     "on": "mdi:water-alert"
+                }
+            },
             "binary_sensor_door_alarm_chiller_common": {
                 "default": "mdi:door",
                 "state": {
