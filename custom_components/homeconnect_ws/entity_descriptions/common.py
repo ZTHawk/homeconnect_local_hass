@@ -67,8 +67,9 @@ def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription
     # that only configured options.
     programs = list(
         filter(
-            lambda program: program.execution
-            in (Execution.SELECT_AND_START, Execution.SELECT_ONLY),
+            lambda program: (
+                program.execution in (Execution.SELECT_AND_START, Execution.SELECT_ONLY)
+            ),
             appliance.programs.values(),
         )
     )
