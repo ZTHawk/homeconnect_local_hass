@@ -91,7 +91,7 @@ class HCStartButton(HCEntity, ButtonEntity):
             "BSH.Common.Status.RemoteControlStartAllowed"
         )
         if remote_start_allowed is not None and remote_start_allowed.value is False:
-            device_name = self._runtime_data.device_info.get("name", "your appliance")
+            device_name = self._runtime_data.device_info.get("name") or "your appliance"
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="remote_start_not_allowed",
