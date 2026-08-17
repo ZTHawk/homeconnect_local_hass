@@ -20,6 +20,10 @@ from custom_components.homeconnect_ws.entity_descriptions.common import (
     generate_program,
 )
 from custom_components.homeconnect_ws.entity_descriptions.cooking import generate_hood_light
+from custom_components.homeconnect_ws.entity_descriptions.refrigeration import (
+    generate_internal_light,
+    generate_internal_light_brightness,
+)
 from custom_components.homeconnect_ws.helpers import merge_dicts
 from custom_components.homeconnect_ws.select import HCSelect
 from home_disconnect.entities import Access, DeviceDescription, EntityDescription
@@ -451,6 +455,65 @@ async def test_hood_color_temperature_mode_select(
     assert entity.current_option == "neutraltocold"
 
 
+INTERNAL_LIGHT = DeviceDescription(
+    setting=[
+        EntityDescription(
+            uid=0x5001,
+            name="Refrigeration.Common.Setting.Light.Internal.Power",
+            access=Access.READ_WRITE,
+            available=True,
+        ),
+        EntityDescription(
+            uid=0x5002,
+            name="Refrigeration.Common.Setting.Light.Internal.Brightness",
+            access=Access.READ_WRITE,
+            available=True,
+            max=100,
+            min=0,
+        ),
+    ]
+)
+
+
+async def test_internal_light(mock_homeconnect_appliance: MockApplianceType) -> None:
+    """Test dynamic internal light."""
+    # Power + Brightness
+    appliance = await mock_homeconnect_appliance(description=INTERNAL_LIGHT)
+    assert generate_internal_light(appliance) == HCLightEntityDescription(
+        key="light_internal",
+        entity="Refrigeration.Common.Setting.Light.Internal.Power",
+        brightness_entity="Refrigeration.Common.Setting.Light.Internal.Brightness",
+    )
+
+    # Power only
+    power_only = DeviceDescription(setting=[INTERNAL_LIGHT["setting"][0]])
+    appliance = await mock_homeconnect_appliance(description=power_only)
+    assert generate_internal_light(appliance) == HCLightEntityDescription(
+        key="light_internal",
+        entity="Refrigeration.Common.Setting.Light.Internal.Power",
+    )
+
+    # No internal light
+    appliance = await mock_homeconnect_appliance(description={})
+    assert generate_internal_light(appliance) is None
+
+
+async def test_internal_light_brightness(mock_homeconnect_appliance: MockApplianceType) -> None:
+    """Test the brightness number defers to the light entity."""
+    # Light entity owns brightness, so the number is opt-in
+    appliance = await mock_homeconnect_appliance(description=INTERNAL_LIGHT)
+    description = generate_internal_light_brightness(appliance)
+    assert description.entity_registry_enabled_default is False
+
+    # No light entity to own it, so the number is the only control
+    brightness_only = DeviceDescription(setting=[INTERNAL_LIGHT["setting"][1]])
+    appliance = await mock_homeconnect_appliance(description=brightness_only)
+    description = generate_internal_light_brightness(appliance)
+    assert description.entity_registry_enabled_default is True
+
+    # No brightness at all
+    appliance = await mock_homeconnect_appliance(description={})
+    assert generate_internal_light_brightness(appliance) is None
 TRANSLATION_DOMAINS = {
     "active_program": "sensor",
     "binary_sensor": "binary_sensor",
