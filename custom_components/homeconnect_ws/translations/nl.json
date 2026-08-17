@@ -2028,14 +2028,6 @@
           "fanstage03": "3"
         }
       },
-      "select_hood_boost": {
-        "name": "Boost",
-        "state": {
-          "intensivestageoff": "Uit",
-          "intensivestage1": "1",
-          "intensivestage2": "2"
-        }
-      },
       "select_hood_color_temperature_mode": {
         "name": "Kleurtemperatuurmodus",
         "state": {

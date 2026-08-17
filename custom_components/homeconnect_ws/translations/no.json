@@ -1820,14 +1820,6 @@
           "regenerativecarbonfilter": "Regenerativt kullfilter"
         }
       },
-      "select_hood_boost": {
-        "name": "Boost",
-        "state": {
-          "intensivestageoff": "Av",
-          "intensivestage1": "1",
-          "intensivestage2": "2"
-        }
-      },
       "select_hood_color_temperature_mode": {
         "name": "Fargetemperaturmodus",
         "state": {

@@ -558,20 +558,23 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         ),
         HCNumberEntityDescription(
             key="number_hood_interval_off",
-            entity="Cooking.Hood.Setting.IntervalTimeOn",
+            entity="Cooking.Hood.Setting.IntervalTimeOff",
             native_unit_of_measurement=UnitOfTime.SECONDS,
+            entity_category=EntityCategory.CONFIG,
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
             key="number_hood_interval_on",
-            entity="Cooking.Hood.Setting.IntervalTimeOff",
+            entity="Cooking.Hood.Setting.IntervalTimeOn",
             native_unit_of_measurement=UnitOfTime.SECONDS,
+            entity_category=EntityCategory.CONFIG,
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
             key="number_hood_delayed_shutoff_time",
             entity="Cooking.Hood.Setting.DelayedShutOffTime",
             native_unit_of_measurement=UnitOfTime.SECONDS,
+            entity_category=EntityCategory.CONFIG,
             mode=NumberMode.AUTO,
         ),
         HCNumberEntityDescription(
@@ -663,6 +666,7 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="select_hob_delaye_shutoff_stage",
             entity="Cooking.Hood.Setting.DelayedShutOffStage",
             has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
         ),
         HCSelectEntityDescription(
             key="select_hob_power_management",
@@ -686,6 +690,7 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="select_hood_interval_stage",
             entity="Cooking.Hood.Setting.IntervalStage",
             has_state_translation=True,
+            entity_category=EntityCategory.CONFIG,
         ),
         HCSelectEntityDescription(
             key="select_hood_carbon_filter_type",
@@ -698,11 +703,6 @@ COOKING_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity="Cooking.Hood.Setting.ColorTemperature",
             has_state_translation=True,
             entity_category=EntityCategory.CONFIG,
-        ),
-        HCSelectEntityDescription(
-            key="select_hood_boost",
-            entity="Cooking.Common.Option.Hood.Boost",
-            has_state_translation=True,
         ),
     ],
     "switch": [

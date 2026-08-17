@@ -1866,14 +1866,6 @@
           "regenerativecarbonfilter": "Regenerative Carbon filter"
         }
       },
-      "select_hood_boost": {
-        "name": "Boost",
-        "state": {
-          "intensivestageoff": "Désactivé",
-          "intensivestage1": "1",
-          "intensivestage2": "2"
-        }
-      },
       "select_hood_color_temperature_mode": {
         "name": "Mode de température de couleur",
         "state": {

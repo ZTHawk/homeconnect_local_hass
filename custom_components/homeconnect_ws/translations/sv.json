@@ -1815,14 +1815,6 @@
           "fanstage03": "3"
         }
       },
-      "select_hood_boost": {
-        "name": "Boostläge",
-        "state": {
-          "intensivestageoff": "Av",
-          "intensivestage1": "1",
-          "intensivestage2": "2"
-        }
-      },
       "select_hood_color_temperature_mode": {
         "name": "Färgtemperaturläge",
         "state": {

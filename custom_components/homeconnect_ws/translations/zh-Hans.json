@@ -1742,14 +1742,6 @@
           "regenerativecarbonfilter": "再生活性炭滤网"
         }
       },
-      "select_hood_boost": {
-        "name": "增压",
-        "state": {
-          "intensivestageoff": "关闭",
-          "intensivestage1": "1",
-          "intensivestage2": "2"
-        }
-      },
       "select_hood_color_temperature_mode": {
         "name": "色温模式",
         "state": {
