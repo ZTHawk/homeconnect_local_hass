@@ -82,12 +82,16 @@ LAUNDRY_RECONNECT_POLL_INTERVAL = timedelta(seconds=20)
 # expected state for these, not a fault: setup doesn't block on a successful
 # connection, and connect failures don't get escalated past debug-level
 # logging (see also upstream chris-mc1/homeconnect_local_hass issues #274 and
-# #293). Washer/dryer *combo* units are deliberately excluded here - the one
-# combo model checked (WNC254A0BY) stayed connected over Wi-Fi while powered
-# off instead, closer to the dishwasher pattern, so combos get the same
-# test-before-setup treatment as every other appliance type until there's
-# evidence a given combo actually needs the exemption too.
-EXPECTED_OFFLINE_APPLIANCE_TYPES = frozenset({"Washer", "Dryer"})
+# #293). Washer/dryer *combo* behavior isn't consistent across models - one
+# checked (WNC254A0BY) stayed connected over Wi-Fi while powered off, closer
+# to the dishwasher pattern, but upstream issue #426 confirms a different
+# combo (WDU28512) does drop off the network like a standalone unit. Included
+# here since the exemption is safe either way: an appliance that actually
+# stays connected essentially never triggers the lenient path, while one that
+# doesn't is spared a false setup error - the only real difference either way
+# is whether an occasional unreachable moment gets treated as expected or
+# escalated as a fault.
+EXPECTED_OFFLINE_APPLIANCE_TYPES = frozenset({"Washer", "Dryer", "WasherDryer"})
 
 
 class HomeConnectCoordinator(DataUpdateCoordinator[None]):

@@ -405,11 +405,20 @@ async def test_nudge_reconnect_is_noop_for_non_exempt_appliance(
     assert mock_appliance.session.connect.call_count == connect_calls_before
 
 
-async def test_setup_entry_washer_dryer_combo_is_blocking(
+async def test_setup_entry_washer_dryer_combo_connect_failure_is_non_blocking(
     hass: HomeAssistant,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """WasherDryer combos are not exempt - the one checked (WNC254A0BY) stays online while off."""
+    """
+    WasherDryer combos are exempt, same as standalone washers/dryers.
+
+    Combo behavior isn't consistent across models - one checked (WNC254A0BY)
+    stays connected while powered off, but upstream issue #426 confirms
+    another (WDU28512) drops offline like a standalone unit. Included in the
+    exemption either way, since it's harmless for a model that happens to
+    stay connected - the previous "not exempt" behavior gave WDU28512-style
+    combos a false setup error whenever they were simply powered off.
+    """
     description = deepcopy(DEVICE_DESCRIPTION)
     description["info"]["type"] = "WasherDryer"
     appliance = MockAppliance(description, "host", "mock_app", "mock_app_id", "PSK_KEY")
@@ -426,10 +435,15 @@ async def test_setup_entry_washer_dryer_combo_is_blocking(
     )
     entry.add_to_hass(hass)
 
+    # Not async_block_till_done(): the exempt path's _connect() retries in a
+    # background task with real asyncio.sleep() backoff, which would hang
+    # this waiting for it. _async_setup() itself returns immediately after
+    # scheduling that task, so entry.state is already settled by this point.
     await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
 
-    assert entry.state is ConfigEntryState.SETUP_RETRY
+    assert entry.state is ConfigEntryState.LOADED
+
+    await hass.config_entries.async_unload(entry.entry_id)
 
 
 def _make_zeroconf_discovery_info(host: str) -> ZeroconfServiceInfo:

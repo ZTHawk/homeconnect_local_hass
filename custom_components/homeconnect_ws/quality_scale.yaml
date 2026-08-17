@@ -27,16 +27,16 @@ rules:
   test-before-setup:
     status: done
     comment: |
-      Type-based split: standalone washers and dryers (EXPECTED_OFFLINE_APPLIANCE_TYPES
-      in coordinator.py) keep the old non-blocking setup - connect() runs in a
-      background task and setup always succeeds, since these appliances
-      routinely cut their own WiFi radio entirely when powered off between
-      cycles (confirmed via fork issue #7: a clean WebSocket close code 1000
-      followed by dropping off the LAN entirely). Every other appliance type,
-      including washer/dryer combos, now blocks setup on a single connect
-      attempt and raises ConfigEntryNotReady on failure, letting HA's normal
-      retry-with-backoff take over - matching how most other integrations
-      behave.
+      Type-based split: washers, dryers, and washer/dryer combos
+      (EXPECTED_OFFLINE_APPLIANCE_TYPES in coordinator.py) keep the old
+      non-blocking setup - connect() runs in a background task and setup
+      always succeeds, since these appliances routinely cut their own WiFi
+      radio entirely when powered off between cycles (confirmed via fork
+      issue #7: a clean WebSocket close code 1000 followed by dropping off
+      the LAN entirely). Every other appliance type blocks setup on a single
+      connect attempt and raises ConfigEntryNotReady on failure, letting HA's
+      normal retry-with-backoff take over - matching how most other
+      integrations behave.
 
       This reverses an earlier decision (see the design history for issues
       #274/#293) that rejected a type-based split as guesswork for appliance
@@ -46,11 +46,15 @@ rules:
       turned "washers/dryers might disconnect their WiFi" from a guess into a
       confirmed fact (WiFi radio shutdown, not just the local API closing),
       specifically for washers and dryers - not for the appliance categories
-      the earlier reasoning was actually worried about, and not even for
-      washer/dryer combos, at least one of which (a Bosch WNC254A0BY) stays
-      connected over Wi-Fi while powered off, closer to the dishwasher
-      pattern. The exemption is scoped to exactly what's confirmed, not
-      widened back into a guess.
+      the earlier reasoning was actually worried about. Washer/dryer combos
+      are included too, despite mixed evidence: one checked (a Bosch
+      WNC254A0BY) stays connected over Wi-Fi while powered off, closer to the
+      dishwasher pattern, but upstream chris-mc1/homeconnect_local_hass issue
+      #426 confirms another (a WDU28512) does drop offline like a standalone
+      unit. Including all combos here is still scoped to confirmed evidence,
+      not a guess - it's just evidence that combo behavior varies by model
+      rather than evidence combos never need it, and the exemption is
+      harmless for a combo that happens to stay connected.
   unique-config-entry: done
 
   # Silver
