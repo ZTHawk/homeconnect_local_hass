@@ -92,8 +92,7 @@ class HCSensor(HCEntity, SensorEntity):
             # appliance's own enum actually has.
             and (
                 self._attr_options is None
-                or self.entity_description.force_option_when_expected_offline
-                in self._attr_options
+                or self.entity_description.force_option_when_expected_offline in self._attr_options
             )
         ):
             return self.entity_description.force_option_when_expected_offline

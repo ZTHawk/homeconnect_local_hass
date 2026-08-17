@@ -205,8 +205,20 @@ async def test_washer_background_connect_does_not_block_till_done(
 async def test_setup_entry_non_laundry_connect_failure_not_ready(
     hass: HomeAssistant,
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Non-laundry appliances raise ConfigEntryNotReady if unreachable at setup."""
+    """
+    Non-laundry appliances raise ConfigEntryNotReady if unreachable at setup.
+
+    Raised as UpdateFailed, not ConfigEntryNotReady directly - confirmed live
+    on fork issue #30: ConfigEntryNotReady isn't a ConfigEntryError subclass,
+    so HA's own __wrap_async_setup() doesn't recognize it as an expected
+    setup failure and logs a full ERROR-level traceback via "Unexpected
+    error fetching %s data" on every single retry while the appliance stays
+    unreachable, before discarding it and raising its own ConfigEntryNotReady
+    anyway. UpdateFailed is handled quietly and still ends up as
+    ConfigEntryNotReady for the config entry.
+    """
     monkeypatch.setattr(coordinator, "SETUP_CONNECT_RETRY_DELAY", 0)
     appliance = MockAppliance(DEVICE_DESCRIPTION, "host", "mock_app", "mock_app_id", "PSK_KEY")
     appliance.session.connect = AsyncMock(side_effect=ConnectionFailedError)
@@ -226,6 +238,7 @@ async def test_setup_entry_non_laundry_connect_failure_not_ready(
     assert entry.state is ConfigEntryState.SETUP_RETRY
     # Every attempt was exhausted, not just one, before giving up.
     assert appliance.session.connect.await_count == coordinator.SETUP_CONNECT_ATTEMPTS
+    assert "Unexpected error fetching" not in caplog.text
 
 
 async def test_setup_entry_non_laundry_retries_transient_connect_failure(
