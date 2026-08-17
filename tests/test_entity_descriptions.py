@@ -514,6 +514,8 @@ async def test_internal_light_brightness(mock_homeconnect_appliance: MockApplian
     # No brightness at all
     appliance = await mock_homeconnect_appliance(description={})
     assert generate_internal_light_brightness(appliance) is None
+
+
 TRANSLATION_DOMAINS = {
     "active_program": "sensor",
     "binary_sensor": "binary_sensor",
