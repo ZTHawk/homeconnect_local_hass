@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, Mock
 from custom_components.homeconnect_ws import HCData, entity_descriptions
 from custom_components.homeconnect_ws.entity_descriptions import (
     HCBinarySensorEntityDescription,
+    HCButtonEntityDescription,
     HCLightEntityDescription,
     HCSelectEntityDescription,
     HCSensorEntityDescription,
@@ -18,6 +19,7 @@ from custom_components.homeconnect_ws.entity_descriptions import (
 from custom_components.homeconnect_ws.entity_descriptions.common import (
     generate_power_switch,
     generate_program,
+    generate_start_button,
 )
 from custom_components.homeconnect_ws.entity_descriptions.cooking import generate_hood_light
 from custom_components.homeconnect_ws.entity_descriptions.refrigeration import (
@@ -26,7 +28,7 @@ from custom_components.homeconnect_ws.entity_descriptions.refrigeration import (
 )
 from custom_components.homeconnect_ws.helpers import merge_dicts
 from custom_components.homeconnect_ws.select import HCSelect
-from home_disconnect.entities import Access, DeviceDescription, EntityDescription
+from home_disconnect.entities import Access, DeviceDescription, EntityDescription, Execution
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.switch import SwitchDeviceClass
 
@@ -348,6 +350,59 @@ async def test_program(mock_homeconnect_appliance: MockApplianceType) -> None:
     )
 
     appliance = await mock_homeconnect_appliance(description={})
+
+
+async def test_start_button_created_when_execution_not_yet_populated(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """
+    The start button must still be created before the appliance's real execution value arrives.
+
+    Confirmed live on fork issue #21: get_available_entities() (which calls
+    this generator) runs before coordinator.async_config_entry_first_refresh()
+    even attempts a connection - for laundry appliances, whose setup is
+    deliberately non-blocking, that can mean no live data has arrived yet at
+    all. program.execution then reads whatever the static profile export
+    defaults to, which real profile exports show is frequently the
+    placeholder "none", not the appliance's real execution type. Requiring a
+    positive SELECT_AND_START/SELECT_ONLY match meant the button silently
+    never got created for the rest of the session. Permissive-by-default
+    (exclude only confirmed START_ONLY) fixes this without needing to change
+    when this generator runs.
+    """
+    description = DeviceDescription(
+        program=[
+            EntityDescription(
+                uid=500,
+                name="Test.Program.Placeholder",
+                execution=Execution.NONE,
+            ),
+        ],
+    )
+    appliance = await mock_homeconnect_appliance(description=description)
+
+    assert generate_start_button(appliance) == HCButtonEntityDescription(
+        key="button_start_program",
+        entity="BSH.Common.Root.ActiveProgram",
+    )
+
+
+async def test_start_button_not_created_for_start_only_programs(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """START_ONLY programs already start on selection - they don't need this button."""
+    description = DeviceDescription(
+        program=[
+            EntityDescription(
+                uid=500,
+                name="Test.Program.StartOnly",
+                execution=Execution.START_ONLY,
+            ),
+        ],
+    )
+    appliance = await mock_homeconnect_appliance(description=description)
+
+    assert generate_start_button(appliance) is None
 
 
 HOOD_BOOST = DeviceDescription(

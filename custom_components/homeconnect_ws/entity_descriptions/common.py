@@ -65,11 +65,27 @@ def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription
     # log: "PUT .../programs/active {'key': '<program>'}" is the literal
     # start action, distinct from the earlier "PUT .../programs/selected"
     # that only configured options.
+    #
+    # Permissive by default (exclude only confirmed START_ONLY), not
+    # restrictive: this generator runs once, synchronously, before the
+    # appliance connection is even attempted (get_available_entities() is
+    # called before coordinator.async_config_entry_first_refresh() - see
+    # __init__.py) - for laundry appliances, whose setup is deliberately
+    # non-blocking, that can mean *no* live data has arrived yet at all.
+    # program.execution then reads whatever the static profile export
+    # defaults to, which is frequently the placeholder "none" (confirmed on
+    # fork issue #21's own washer - every program in a real profile export
+    # showed execution="none", not the appliance's real value). Requiring a
+    # positive SELECT_AND_START/SELECT_ONLY match meant the button silently
+    # never got created for the rest of the session whenever this ran before
+    # the real value arrived. HCStartButton.available is a live property and
+    # correctly reflects the true execution type once data does arrive, so
+    # the only actual cost of over-including here is a harmless extra button
+    # on a genuinely START_ONLY appliance - far cheaper than a required
+    # button silently missing for the whole session.
     programs = list(
         filter(
-            lambda program: (
-                program.execution in (Execution.SELECT_AND_START, Execution.SELECT_ONLY)
-            ),
+            lambda program: program.execution != Execution.START_ONLY,
             appliance.programs.values(),
         )
     )
