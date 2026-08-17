@@ -45,16 +45,20 @@ rules:
       precedent for the same "sleepy device" problem. What changed: issue #7
       turned "washers/dryers might disconnect their WiFi" from a guess into a
       confirmed fact (WiFi radio shutdown, not just the local API closing),
-      specifically for washers and dryers - not for the appliance categories
-      the earlier reasoning was actually worried about. Washer/dryer combos
-      are included too, despite mixed evidence: one checked (a Bosch
-      WNC254A0BY) stays connected over Wi-Fi while powered off, closer to the
-      dishwasher pattern, but upstream chris-mc1/homeconnect_local_hass issue
-      #426 confirms another (a WDU28512) does drop offline like a standalone
-      unit. Including all combos here is still scoped to confirmed evidence,
-      not a guess - it's just evidence that combo behavior varies by model
-      rather than evidence combos never need it, and the exemption is
-      harmless for a combo that happens to stay connected.
+      for at least some washers, dryers, and combos - not for the appliance
+      categories the earlier reasoning was actually worried about. Evidence
+      shows this varies by model within the washer/dryer/combo group itself,
+      not just for combos: one combo checked (a Bosch WNC254A0BY) stays
+      connected over Wi-Fi while powered off, closer to the dishwasher
+      pattern, while upstream chris-mc1/homeconnect_local_hass issue #426
+      confirms another combo (a WDU28512) does drop offline like a standalone
+      unit is expected to - and a standalone washer (a Bosch WGB256ABSN,
+      fork issue #21) has also been confirmed to stay connected while
+      powered off, the same as the WNC254A0BY combo. Including the whole
+      washer/dryer/combo group here is still scoped to confirmed evidence,
+      not a guess - it's just evidence that behavior varies by model across
+      the whole group rather than evidence any of them never need it, and the
+      exemption is harmless for a model that happens to stay connected.
   unique-config-entry: done
 
   # Silver
