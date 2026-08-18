@@ -287,6 +287,9 @@
       },
       "switch_extra_rinse": {
         "name": "Extra Rinse"
+      },
+      "switch_pretreatment": {
+        "name": "Pre-Treatment"
       }
     },
     "binary_sensor": {
@@ -1350,6 +1353,7 @@
           "cooking_common_program_hood_automatic": "Automatic",
           "cooking_common_program_hood_delayedshutoff": "Delayed shut-off",
           "cooking_common_program_hood_venting": "Venting",
+          "cooking_common_program_hood_interval": "Interval Ventilation",
           "laundrycare_washer_program_automatic30_auto30_auto30": "Wash - Automatic soft/30",
           "laundrycare_washer_program_auto60": "Wash - Automatic 60",
           "laundrycare_washer_program_automatic4060_auto40_auto40": "Wash - Automatic 40-60",
@@ -2875,6 +2879,7 @@
           "cooking_common_program_hood_automatic": "Automatic",
           "cooking_common_program_hood_delayedshutoff": "Delayed shut-off",
           "cooking_common_program_hood_venting": "Venting",
+          "cooking_common_program_hood_interval": "Interval Ventilation",
           "laundrycare_washer_program_automatic30_auto30_auto30": "Wash - Automatic soft/30",
           "laundrycare_washer_program_auto60": "Wash - Automatic 60",
           "laundrycare_washer_program_automatic4060_auto40_auto40": "Wash - Automatic 40-60",

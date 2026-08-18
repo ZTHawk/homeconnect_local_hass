@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 async def test_export_view_returns_zip(
     hass: HomeAssistant,
     hass_client: ClientSessionGenerator,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """The view returns a ZIP with the expected filename and content type."""
     assert await async_setup_component(hass, "http", {})

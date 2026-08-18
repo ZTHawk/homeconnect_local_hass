@@ -33,8 +33,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -53,7 +53,7 @@ async def test_setup(
 async def test_update(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -98,7 +98,7 @@ async def test_update(
 async def test_turn_on(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning on."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -127,7 +127,7 @@ async def test_turn_on(
 async def test_turn_off(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -154,7 +154,7 @@ async def test_turn_off(
 async def test_turn_off_when_already_off(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off when no program is active."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -174,7 +174,7 @@ async def test_turn_off_when_already_off(
 async def test_off_when_program_cleared_but_venting_stale(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Fan reports off when program ends even if venting level is stale."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -199,7 +199,7 @@ async def test_off_when_program_cleared_but_venting_stale(
 async def test_set_speed(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test setting a speed."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)

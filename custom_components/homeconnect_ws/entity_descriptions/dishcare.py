@@ -381,5 +381,10 @@ DISHCARE_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity_category=EntityCategory.CONFIG,
             entity_registry_enabled_default=False,
         ),
+        HCSwitchEntityDescription(
+            key="switch_pretreatment",
+            entity="Dishcare.Dishwasher.Option.Pretreatment",
+            device_class=SwitchDeviceClass.SWITCH,
+        ),
     ],
 }

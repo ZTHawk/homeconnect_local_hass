@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -70,7 +70,7 @@ async def test_setup(
 async def test_update(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity."""
     entity_id = "select.fake_brand_homeappliance_select"
@@ -106,7 +106,7 @@ async def test_update(
 async def test_select(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test selecting an option."""
     entity_id = "select.fake_brand_homeappliance_select"
@@ -174,7 +174,7 @@ async def test_select(
 async def test_update_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating program select entity."""
     entity_id = "select.fake_brand_homeappliance_selectedprogram"
@@ -195,7 +195,7 @@ async def test_update_program(
 async def test_update_program_from_active_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """current_option falls back to ActiveProgram when SelectedProgram has none set."""
     entity_id = "select.fake_brand_homeappliance_selectedprogram"
@@ -211,7 +211,7 @@ async def test_update_program_from_active_program(
 async def test_start_only_program_available_with_read_only_selected_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """
     The program select stays available on hoods with a read-only SelectedProgram.
@@ -255,7 +255,7 @@ async def test_start_only_program_available_with_read_only_selected_program(
 async def test_select_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test selecting an program."""
     entity_id = "select.fake_brand_homeappliance_selectedprogram"
@@ -312,7 +312,7 @@ async def test_select_program(
 async def test_start_only_program_sends_known_option_values(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """
     Starting a start-only program includes its options' already-known values.

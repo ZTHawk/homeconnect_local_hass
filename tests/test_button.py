@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -41,7 +41,7 @@ async def test_setup(
 async def test_start(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test pressing start button."""
     entity_id = "button.fake_brand_homeappliance_activeprogram"
@@ -71,7 +71,7 @@ async def test_start(
 async def test_start_available_for_select_only_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """
     The start button must work for SELECT_ONLY programs too, not just SELECT_AND_START.
@@ -111,7 +111,7 @@ async def test_start_available_for_select_only_program(
 async def test_start_stays_available_when_remote_start_not_allowed(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """
     The start button must stay visible/pressable even when remote start is currently refused.
@@ -142,7 +142,7 @@ async def test_start_stays_available_when_remote_start_not_allowed(
 async def test_start_raises_when_remote_start_not_allowed(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Pressing start while remote start isn't allowed must error, not silently no-op."""
     entity_id = "button.fake_brand_homeappliance_activeprogram"
@@ -168,7 +168,7 @@ async def test_start_raises_when_remote_start_not_allowed(
 async def test_start_proceeds_when_blocked_for_a_different_reason(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """
     Pressing start while blocked for a non-remote-start reason must not misattribute it.
@@ -203,7 +203,7 @@ async def test_start_proceeds_when_blocked_for_a_different_reason(
 async def test_abort(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test pressing abort button."""
     entity_id = "button.fake_brand_homeappliance_abortprogram"
