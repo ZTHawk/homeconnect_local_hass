@@ -63,7 +63,42 @@ Disabling cloud has two method
 4.2: Cloud side: The fake cloud, already connected to the appliance sends the command instead (harder since we dont know whats sent)
 
 ```
-cool visual thing
+Phone --(shares home WiFi creds via appliance's own hotspot)--> Appliance
+                                                                    |
+                                                                    v
+                                                        Appliance joins home WAP
+                                                                    |
+                                                                    v
+                                                    Appliance <==TLS==> Fake Cloud
+                                                     (registers, reports/negotiates
+                                                            local keys)
+                                                                    |
+                                                                    v
+                                                  Fake Cloud has everything needed
+                                                    for the appliance's profile
+                                                                    |
+                                                                    v
+                                                  Profile file lands on the user's
+                                                          computer
+                                                                    |
+                                                                    v
+                                             Imported into homeconnect_local_hass
+                                                                    |
+                                          +-------------------------+-------------------------+
+                                          |                                                   |
+                                          v                                                   v
+                                4.1 Phone/HA side                                    4.2 Cloud side
+                          HA -> appliance's local WS                        Fake Cloud (still connected)
+                         using keys from the profile                        sends disable-cloud itself
+                        (what the integration does now)                       (harder — payload unknown)
+                                          |                                                   |
+                                          +-------------------------+-------------------------+
+                                                                    |
+                                                                    v
+                                                    Appliance's cloud connection off
+                                                                    |
+                                                                    v
+                                                       100% local from here on
 ```
 
 ## Prior art
