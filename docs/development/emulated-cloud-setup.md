@@ -4,7 +4,7 @@
 
 ## The gap this would close
 
-Today, `homeconnect_local_hass` is internet-free for everything *except* one step: getting the appliance's profile file. This currently involves either the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) or this integration's own OAuth setup path (`hc_cloud_api.py`), both of require logging into an account on the Home Connect cloud to pull that data. Once you have it, the appliance is controlled entirely over its local WebSocket, the cloud is never involved again, and you can disable the appliance's "Allow Cloud Connection" switch.
+Today, `homeconnect_local_hass` is internet-free for everything *except* one step: getting the appliance's profile file. This currently involves either the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) or this integration's own OAuth setup path (`hc_cloud_api.py`), both of which require logging into an account on the Home Connect cloud to pull that data. Once you have it, the appliance is controlled entirely over its local WebSocket, the cloud is never involved again, and you can disable the appliance's "Allow Cloud Connection" switch.
 
 So the *only* remaining internet dependency is a one-time step during setup.
 
@@ -14,7 +14,7 @@ A brand-new (or factory/network-reset) BSH appliance's very first WiFi/cloud acc
 
 If that handshake were pointed at a **local, fake cloud server** instead of BSH's real one, the same way `rethink` emulates LG's AWS backend for LG ThinQ appliances that have no local API at all, the appliance would complete pairing believing it registered to a real account, and the local keys could be captured directly from that handshake. No request would ever reach BSH's actual servers.
 
-Combined with the fact that ongoing operation is already 100% local, this would mean **the entire appliance lifecycle, setup included, never touches BSH's cloud.** That's the appeal over the current OAuth-cloud-API approach: it makes the last "requires internet" optinal instead of manditory.
+Combined with the fact that ongoing operation is already 100% local, this would mean **the entire appliance lifecycle, setup included, never touches BSH's cloud.** That's the appeal over the current OAuth-cloud-API approach: it makes the last "requires internet" optional instead of mandatory.
 
 Since the web socket is the exact same regardless of whether it was setup with the fake or real cloud, this means that this integration can still cover both setup methods. It also benefits other Home Connect Local integrations like the ones for [Homey](https://homey.app/en-us/app/codes.lucasvdh.homeconnect/Home-Connect-(Local)/test/) or [OpenHab](https://www.openhab.org/addons/bindings/homeconnectdirect/).
 
@@ -38,16 +38,16 @@ None of the following has been reverse-engineered yet. This is not a "wire up re
 
 Before writing any server code: capture a full packet trace (via a controlled AP running `mitmproxy` or even just `tcpdump`) of one already-owned appliance's factory/network-reset re-pairing process. That alone answers the certificate-pinning question, which determines whether the rest of this is worth attempting.
 
-Also determine the WI-FI password, heres what I've confirmed so far
+Also determine the WI-FI password, here's what I've confirmed so far
 SSID: HomeConnect
 Password: HomeConnect
 I haven't confirmed if the password is this, but the SSID is confirmed. Seeing what the android app sends as the password to the appliance may be able to confirm it.
 
 ## Important appliances quirks.
 
-A Home Connect Appliance is setup in a weird way. For some appliances like the Thermador T36IF905SP, pairing to WI-FI and connecting it to the app are two separate processes. But for most dishwashers like the Bosch SHE43DM5N its one process. Some appliances like the Thermador PRG486WDH has support for WPS which may just connect it to wifi but not to the app. Its unknown how or if the appliance contacts the cloud in this phase, but whats known is that it doesn't open its web socket.
+A Home Connect Appliance is setup in a weird way. For some appliances like the Thermador T36IF905SP, pairing to WI-FI and connecting it to the app are two separate processes. But for most dishwashers like the Bosch SHE43DM5N it's one process. Some appliances like the Thermador PRG486WDH have support for WPS which may just connect it to wifi but not to the app. It's unknown how or if the appliance contacts the cloud in this phase, but what's known is that it doesn't open its web socket.
 
-Future BSH Appliances will come with matter which involves both wifi and bluetooth. The app may have to account for a bluetooth pairing process in the future.
+Future BSH Appliances will come with Matter which involves both wifi and bluetooth. The app may have to account for a bluetooth pairing process in the future.
 
 For some reason a Home Connect Appliance can be registered to multiple accounts. Not sure how this would handle it.
 
@@ -100,12 +100,13 @@ Phone --(shares home WiFi creds via appliance's own hotspot)--> Appliance
 ### Some stuff to point out
 
 - There has to be a fake account.
-- Its unknown if the appliance sends the full profile file to cloud or data that the cloud then refactors into a profile file.
-- The good news is this setup **does not** override the appliance's firmware, so once the software is ready for the public its not super risky.
+- It's unknown if the appliance sends the full profile file to cloud or data that the cloud then refactors into a profile file.
+- The good news is this setup **does not** override the appliance's firmware, so once the software is ready for the public it's not super risky.
 
 ### Another idea
 
-After the software is developed and throughly tested, to simpilify setup, the app could also go in a pairing mode. During this pairing mode Home Assistant can connect to the computer which has the profile file, and take it and then connect to the appliance.
+After the software is developed and thoroughly tested, to simplify setup, the app could also go in a pairing mode. During this pairing mode Home Assistant can connect to the computer which has the profile file, and take it and then connect to the appliance.
+
 ## Prior work
 
 - [rethink](https://github.com/anszom/rethink): the LG ThinQ equivalent. Their situation is actually harder than BSH's: LG appliances have no local API at all, so rethink has to keep a fake cloud running permanently to handle ongoing control. Here, the fake cloud would only ever need to run for the few minutes of initial pairing, everything after that is already native and local.
