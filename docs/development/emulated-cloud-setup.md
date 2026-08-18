@@ -4,12 +4,7 @@
 
 ## The gap this would close
 
-Today, `homeconnect_local_hass` is internet-free for everything *except* one step: getting the appliance's
-local encryption keys and device description in the first place. That currently means either the
-[Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) or this
-integration's own OAuth setup path (`hc_cloud_api.py`), both of which log into the real Home Connect cloud
-to pull that data. Once you have it, the appliance is controlled entirely over its local WebSocket — the
-cloud is never involved again, and you can disable the appliance's "Allow Cloud Connection" switch.
+Today, `homeconnect_local_hass` is internet-free for everything *except* one step: getting the appliance's profile file. This currently involves either the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) or this integration's own OAuth setup path (`hc_cloud_api.py`), both of require logging into an account on the Home Connect cloud to pull that data. Once you have it, the appliance is controlled entirely over its local WebSocket, the cloud is never involved again, and you can disable the appliance's "Allow Cloud Connection" switch.
 
 So the *only* remaining internet dependency is a one-time step during setup.
 
@@ -19,13 +14,13 @@ A brand-new (or factory-reset) BSH appliance's very first WiFi/cloud pairing is 
 with BSH's cloud — the appliance registers itself to a Home Connect account, and as part of that, its local
 encryption keys get established/reported.
 
-If that handshake were pointed at a **local, fake cloud server** instead of BSH's real one — the same way
-`rethink` emulates LG's AWS backend for LG ThinQ appliances that have no local API at all — the appliance
+If that handshake were pointed at a **local, fake cloud server** instead of BSH's real one, the same way
+`rethink` emulates LG's AWS backend for LG ThinQ appliances that have no local API at all, the appliance
 would complete pairing believing it registered to a real account, and the local keys could be captured
 directly from that handshake. No request would ever reach BSH's actual servers.
 
 Combined with the fact that ongoing operation is already 100% local, this would mean **the entire appliance
-lifecycle — setup included — never touches BSH's cloud.** That's the appeal over the current OAuth-cloud-API
+lifecycle, setup included, never touches BSH's cloud.** That's the appeal over the current OAuth-cloud-API
 approach: it removes the last "requires internet" asterisk entirely, not just for day-to-day use.
 
 ## Why "Allow Cloud Connection" still matters here
@@ -68,6 +63,10 @@ Before writing any server code: capture a full packet trace (via a controlled AP
 even just `tcpdump`) of one already-owned appliance's factory-reset re-pairing process. That alone answers
 the certificate-pinning question, which determines whether the rest of this is worth attempting.
 
+## Important appliances quirks.
+An Home Connect Appliance is setup in a weird way. For some appliances like
+
+## How the so
 ## Prior art
 
 - [rethink](https://github.com/anszom/rethink) — the LG ThinQ equivalent. Their situation is actually harder
