@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 async def test_options_flow_shows_export_menu(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """The options flow shows a mode selector on init."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -37,8 +37,8 @@ async def test_options_flow_shows_export_menu(
 
 async def test_options_flow_export_safe_creates_signed_link_notification(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Safe export closes the flow and notifies with a signed download link."""
     assert await async_setup_component(hass, "http", {})
@@ -71,8 +71,8 @@ async def test_options_flow_export_safe_creates_signed_link_notification(
 
 async def test_options_flow_export_full_writes_file(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Full export writes a ZIP with the key to the config directory, no HTTP link."""
     assert await setup_config_entry(hass, {**MOCK_CONFIG_DATA, CONF_MODE: "AES"})

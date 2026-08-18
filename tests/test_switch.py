@@ -32,8 +32,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -54,7 +54,7 @@ async def test_setup(
 async def test_update(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -78,7 +78,7 @@ async def test_update(
 async def test_update_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"
@@ -102,7 +102,7 @@ async def test_update_enum(
 async def test_turn_on(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning on."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -127,7 +127,7 @@ async def test_turn_on(
 async def test_turn_on_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning on with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"
@@ -151,7 +151,7 @@ async def test_turn_on_enum(
 async def test_turn_off(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -176,7 +176,7 @@ async def test_turn_off(
 async def test_turn_off_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"

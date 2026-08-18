@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -63,7 +63,7 @@ async def test_setup(
 async def test_update(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity."""
     entity_id = "sensor.fake_brand_homeappliance_sensor"
@@ -79,7 +79,7 @@ async def test_update(
 async def test_callback_recovers_after_write_failure(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """
@@ -124,7 +124,7 @@ async def test_callback_recovers_after_write_failure(
 async def test_update_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity with enum."""
     entity_id = "sensor.fake_brand_homeappliance_sensor_enum"
@@ -146,7 +146,7 @@ async def test_update_enum(
 async def test_update_event(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating event sensor."""
     entity_id = "sensor.fake_brand_homeappliance_sensor_event"
@@ -181,7 +181,7 @@ async def test_update_event(
 async def test_update_active_program(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating active program entity."""
     entity_id = "sensor.fake_brand_homeappliance_activeprogram"
