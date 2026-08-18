@@ -15,7 +15,7 @@ The **Home Connect Local** allows users to integrate their home appliances suppo
 
 - **[IoT Class](https://www.home-assistant.io/blog/2016/02/12/classifying-the-internet-of-things/#classifiers):** Local Push
 - **[Secondary IoT Class](https://github.com/vemboy200/home-assistant.io/blob/iot-class-revamp-p3/source/_docs/iot_class.markdown) (unoffical thing):** Local Polling: The WiFi signal-strength diagnostic sensor is polled every hour
-- **[Internet Requirement](https://github.com/vemboy200/home-assistant.io/blob/iot-class-revamp-p3/source/_docs/requires_internet.markdown) (unoffical thing):** Setup: obtaining your appliance's encryption keys via the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) needs a one-time connection to the Home Connect cloud. Day-to-day operation after that is entirely local and works without an internet connection
+- **[Internet Requirement](https://github.com/vemboy200/home-assistant.io/blob/iot-class-revamp-p3/source/_docs/requires_internet.markdown) (unoffical thing):** Setup: obtaining your appliance's encryption keys via the [Home Connect Profile Downloader](https://github.com/bruestel/homeconnect-profile-downloader) needs a one-time connection to the Home Connect cloud. Day-to-day operation after that is entirely local and works without an internet connection (see [this idea](docs/development/emulated-cloud-setup.md) for removing even that)
 - **[Quality Scale](https://www.home-assistant.io/docs/quality_scale/#-platinum):** 🏆 Platinum
 - Current Maintainer: [@vemboy200](https://github.com/vemboy200)
 - Original Maintainer: [@chris-mc1](https://github.com/chris-mc1)
