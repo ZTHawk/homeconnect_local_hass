@@ -85,8 +85,8 @@ Phone --(shares home WiFi creds via appliance's own hotspot)--> Appliance
                                           v                                                   v
                                 4.1 Phone/HA side                                    4.2 Cloud side
                         Phone/HA -> appliance's local WS                      Fake Cloud (still connected)
-                         using keys from the profile                          sends disable-cloud itself
-                        (what the integration can do now)                     (harder — payload unknown)
+                         using keys from the profile                           sends disable-cloud itself
+                    (what the integration can right do now)                    (harder: payload unknown)
                                           |                                                   |
                                           +-------------------------+-------------------------+
                                                                     |
