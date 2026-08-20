@@ -245,8 +245,10 @@ class HCProgram(HCSelect):
             value = opt.value_shadow
             if value is None:
                 value = opt.value
-            if value is None:
-                value = opt.min
+            if value is None and opt.min is not None:
+                # opt.min is typed float (generic XML min/max parsing), but the
+                # wire protocol only ever takes int/str/bool option values.
+                value = int(opt.min)
             if value is None:
                 continue
             options[opt.uid] = value
