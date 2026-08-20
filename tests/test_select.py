@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from custom_components.homeconnect_ws import HCData
 from custom_components.homeconnect_ws.entity_descriptions.descriptions_definitions import (
     HCSelectEntityDescription,
 )
 from custom_components.homeconnect_ws.select import HCSelect
-from home_disconnect.entities import Access, Execution
+from home_disconnect.entities import Access, Execution, Program
 from home_disconnect.message import Action, Message
 from homeassistant.components.select import (
     ATTR_OPTION,
@@ -343,6 +343,83 @@ async def test_start_only_program_sends_known_option_values(
             data={
                 "program": 502,
                 "options": [{"uid": 401, "value": 1}, {"uid": 402, "value": None}],
+            },
+        )
+    )
+
+
+async def test_full_option_set_program_sends_complete_options(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    An appliance advertising fullOptionSet gets program and options in one write.
+
+    Confirmed live on a Bosch HNG6764B6 oven: it marks its SelectedProgram
+    fullOptionSet, and rejects both a bare POST to /ro/selectedProgram and an
+    option sent as null - every one of its programs failed to select with a
+    400. Test.Option2 has no value anywhere, so it is left out of the write
+    entirely rather than sent as null.
+    """
+    entity_id = "select.fake_brand_homeappliance_selectedprogram"
+    await mock_appliance.entities["Test.Option1"].update({"value": 1})
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+
+    with patch.object(Program, "full_option_set", new=True, create=True):
+        await hass.services.async_call(
+            SELECT_DOMAIN,
+            SERVICE_SELECT_OPTION,
+            {
+                ATTR_ENTITY_ID: entity_id,
+                ATTR_OPTION: "test_program_program2",
+            },
+            blocking=True,
+        )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/activeProgram",
+            action=Action.POST,
+            data={
+                "program": 501,
+                "options": [{"uid": 401, "value": 1}],
+            },
+        )
+    )
+
+
+async def test_full_option_set_select_only_program_stays_on_selected_program(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """A select-only program keeps /ro/selectedProgram, but carries its options."""
+    entity_id = "select.fake_brand_homeappliance_selectedprogram"
+    await mock_appliance.entities["Test.Option1"].update({"value": 1})
+    await mock_appliance.programs["Test.Program.Program2"].update(
+        {"execution": Execution.SELECT_ONLY}
+    )
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+
+    with patch.object(Program, "full_option_set", new=True, create=True):
+        await hass.services.async_call(
+            SELECT_DOMAIN,
+            SERVICE_SELECT_OPTION,
+            {
+                ATTR_ENTITY_ID: entity_id,
+                ATTR_OPTION: "test_program_program2",
+            },
+            blocking=True,
+        )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/selectedProgram",
+            action=Action.POST,
+            data={
+                "program": 501,
+                "options": [{"uid": 401, "value": 1}],
             },
         )
     )
