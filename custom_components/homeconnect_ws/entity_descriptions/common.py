@@ -93,6 +93,14 @@ def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription
         return HCButtonEntityDescription(
             key="button_start_program",
             entity="BSH.Common.Root.ActiveProgram",
+            # HCStartButton.available reads appliance.selected_program, which
+            # resolves through SelectedProgram, not ActiveProgram - without
+            # this, the button only re-renders when ActiveProgram itself
+            # changes, so live power-on/off toggling (which updates
+            # SelectedProgram) can leave the displayed availability a step
+            # stale until something else happens to touch ActiveProgram.
+            # Confirmed live on fork issue #54.
+            entities=["BSH.Common.Root.SelectedProgram"],
         )
     return None
 

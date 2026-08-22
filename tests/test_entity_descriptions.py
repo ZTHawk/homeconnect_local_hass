@@ -384,6 +384,7 @@ async def test_start_button_created_when_execution_not_yet_populated(
     assert generate_start_button(appliance) == HCButtonEntityDescription(
         key="button_start_program",
         entity="BSH.Common.Root.ActiveProgram",
+        entities=["BSH.Common.Root.SelectedProgram"],
     )
 
 
