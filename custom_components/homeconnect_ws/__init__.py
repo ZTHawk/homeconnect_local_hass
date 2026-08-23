@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Never
 import voluptuous as vol
 from home_disconnect import CodeResponsError, Entity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_DESCRIPTION, EVENT_HOMEASSISTANT_STOP, CONF_HOST
+from homeassistant.const import CONF_DESCRIPTION, CONF_HOST, EVENT_HOMEASSISTANT_STOP
 from homeassistant.exceptions import ConfigEntryError, ServiceValidationError
 from homeassistant.helpers.device_registry import (
     CONNECTION_NETWORK_MAC,
