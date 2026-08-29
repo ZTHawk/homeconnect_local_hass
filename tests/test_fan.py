@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock
 
 from home_disconnect.message import Action, Message
 from homeassistant.components.fan import (
@@ -134,10 +133,6 @@ async def test_turn_off(
     await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
     await hass.async_block_till_done()
 
-    active_program = mock_appliance.active_program
-    assert active_program is not None
-    active_program.start = AsyncMock()
-
     await hass.services.async_call(
         FAN_DOMAIN,
         SERVICE_TURN_OFF,
@@ -145,10 +140,9 @@ async def test_turn_off(
         blocking=True,
     )
 
-    active_program.start.assert_awaited_once_with(
-        {403: 0, 404: 0},
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(resource="/ro/activeProgram", action=Action.DELETE, data=[])
     )
-    mock_appliance.session.send_sync.assert_not_awaited()
 
 
 async def test_turn_off_when_already_off(

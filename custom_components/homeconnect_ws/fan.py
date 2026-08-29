@@ -6,6 +6,8 @@ import math
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from home_disconnect.entities import Access
+from home_disconnect.message import Action
+from home_disconnect.message import Message as HC_Message
 from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.util.percentage import percentage_to_ranged_value, ranged_value_to_percentage
@@ -203,9 +205,11 @@ class HCFan(HCEntity, FanEntity):
         if appliance.active_program is None:
             return
 
-        options = self._speed_options(appliance.active_program, value=0)
-        if not options:
-            return
-
-        await appliance.active_program.start(options)
+        # Writing 0 to the speed options (the previous approach) is rejected
+        # by some hoods - confirmed live via debug log (fork issue #17): the
+        # appliance's confirmation echoes the option back at its old,
+        # non-zero value instead of accepting 0. Deleting the active program
+        # is the correct way to stop it, matching upstream issue #386.
+        message = HC_Message(resource="/ro/activeProgram", action=Action.DELETE, data=[])
+        await appliance.session.send_sync(message)
         self.async_write_ha_state()
