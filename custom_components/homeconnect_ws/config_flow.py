@@ -18,8 +18,10 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from aiohttp import ClientConnectionError, ClientConnectorSSLError
 from home_disconnect import (
+    AuthenticationError,
     ConnectionFailedError,
     ConnectionState,
+    HCHandshakeError,
     HomeAppliance,
     ParserError,
     parse_device_description,
@@ -381,7 +383,10 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         except BinasciiError as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
             return self.async_abort(reason="auth_failed")
-        except (TimeoutError, ClientConnectionError, ConnectionFailedError) as ex:
+        except AuthenticationError as ex:
+            _LOGGER.debug("validate_config failed: %s", ex)
+            return self.async_abort(reason="auth_failed")
+        except (TimeoutError, ClientConnectionError, ConnectionFailedError, HCHandshakeError) as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
             self.errors["base"] = "cannot_connect"
         finally:
