@@ -10,7 +10,7 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
 from .entity import HCEntity
-from .helpers import create_entities, error_decorator
+from .helpers import build_full_option_set, create_entities, error_decorator, needs_full_option_set
 
 if TYPE_CHECKING:
     from home_disconnect.entities import ActiveProgram, Command
@@ -97,4 +97,15 @@ class HCStartButton(HCEntity, ButtonEntity):
                 translation_key="remote_start_not_allowed",
                 translation_placeholders={"device_name": device_name},
             )
-        await selected_program.start()
+        if needs_full_option_set(selected_program):
+            # This appliance validates a program write against the program's
+            # complete option set and rejects anything less with a 400
+            # (confirmed on a Siemens CoffeeMaker and a NEFF oven) - the
+            # default merge behaviour below blindly resends every option's
+            # raw shadow value, which can still be None for one the
+            # appliance hasn't reported yet. Mirrors HCProgram's own
+            # _select_with_full_option_set in select.py.
+            options = build_full_option_set(self._runtime_data.appliance, selected_program)
+            await selected_program.start(options, override_options=True)
+        else:
+            await selected_program.start()

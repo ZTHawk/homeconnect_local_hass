@@ -8,12 +8,17 @@ from home_disconnect.entities import Access, Execution
 from homeassistant.components.select import SelectEntity
 
 from .entity import HCEntity
-from .helpers import create_entities, entity_is_available, error_decorator
+from .helpers import (
+    build_full_option_set,
+    create_entities,
+    entity_is_available,
+    error_decorator,
+    needs_full_option_set,
+)
 
 if TYPE_CHECKING:
-    from home_disconnect.appliance import HomeAppliance
     from home_disconnect.entities import Entity as HcEntity
-    from home_disconnect.entities import Option, Program, SelectedProgram
+    from home_disconnect.entities import Program, SelectedProgram
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -190,7 +195,7 @@ class HCProgram(HCSelect):
     @error_decorator
     async def async_select_option(self, option: str) -> None:
         selected_program = self._runtime_data.appliance.programs[self._rev_programs[option]]
-        if _needs_full_option_set(selected_program):
+        if needs_full_option_set(selected_program):
             # This appliance validates a program write against the program's
             # complete option set and rejects anything less with a 400, so
             # neither of the branches below can apply to it (confirmed live on
@@ -217,7 +222,7 @@ class HCProgram(HCSelect):
 
     async def _select_with_full_option_set(self, program: Program) -> None:
         """Write program and options together, for appliances that demand both."""
-        options = self._build_option_set(program)
+        options = build_full_option_set(self._runtime_data.appliance, program)
         if program.execution == Execution.SELECT_ONLY:
             await program.select(options, override_options=True)
         else:
@@ -225,55 +230,3 @@ class HCProgram(HCSelect):
             # appliance that combines selecting and starting into a single
             # operation rejects a bare POST to /ro/selectedProgram with a 400.
             await program.start(options, override_options=True)
-
-    def _build_option_set(self, program: Program) -> dict[int, str | int | bool]:
-        """
-        Collect a complete, well-formed option set for a program write.
-
-        The library derives the option list from each option's value_shadow, which
-        stays None until the appliance has reported a value. An appliance that wants
-        a full option set rejects the resulting {"uid": x, "value": None} entries, so
-        fall back to the current value and finally to the option's minimum. Options
-        that stay valueless even then are left out rather than sent as null.
-        """
-        options: dict[int, str | int | bool] = {}
-        for opt in program._options:  # noqa: SLF001
-            if opt.access != Access.READ_WRITE:
-                continue
-            if _is_unplugged_probe(self._runtime_data.appliance, opt):
-                continue
-            value = opt.value_shadow
-            if value is None:
-                value = opt.value
-            if value is None and opt.min is not None:
-                # opt.min is typed float (generic XML min/max parsing), but the
-                # wire protocol only ever takes int/str/bool option values.
-                value = int(opt.min)
-            if value is None:
-                continue
-            options[opt.uid] = value
-        return options
-
-
-def _needs_full_option_set(program: Program) -> bool:
-    """
-    Whether this appliance expects program and options as one complete write.
-
-    Comes from the fullOptionSet flag in the device description. home_disconnect
-    parses it into EntityDescription but does not expose it on Program yet, so
-    this stays False - and every appliance keeps its current behaviour - until it
-    does.
-    """
-    return bool(getattr(program, "full_option_set", False))
-
-
-def _is_unplugged_probe(appliance: HomeAppliance, option: Option) -> bool:
-    """
-    Whether option is a meat probe setpoint while no probe is plugged in.
-
-    Supplying it anyway makes the appliance reject the entire program write.
-    """
-    if "MeatProbeTemperature" not in option.name:
-        return False
-    plugged = appliance.status.get("Cooking.Oven.Status.MeatprobePlugged")
-    return not bool(getattr(plugged, "value", False))

@@ -6,6 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from home_disconnect.entities import Access
 from home_disconnect.errors import AccessError, CodeResponsError, NotConnectedError
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.service import async_extract_config_entry_ids
@@ -17,8 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from home_disconnect import HomeAppliance
-    from home_disconnect.entities import Access
     from home_disconnect.entities import Entity as HcEntity
+    from home_disconnect.entities import Option, Program
     from homeassistant.core import HomeAssistant, ServiceCall
 
     from . import HCConfigEntry, HCData
@@ -112,6 +113,54 @@ def entity_is_available(
     if entity is not None and available_access is not None and hasattr(entity, "access"):
         available &= entity.access in available_access
     return available
+
+
+def needs_full_option_set(program: Program) -> bool:
+    """Whether this appliance expects program and options as one complete write."""
+    return program.full_option_set
+
+
+def is_unplugged_probe(appliance: HomeAppliance, option: Option) -> bool:
+    """
+    Whether option is a meat probe setpoint while no probe is plugged in.
+
+    Supplying it anyway makes the appliance reject the entire program write.
+    """
+    if "MeatProbeTemperature" not in option.name:
+        return False
+    plugged = appliance.status.get("Cooking.Oven.Status.MeatprobePlugged")
+    return not bool(getattr(plugged, "value", False))
+
+
+def build_full_option_set(
+    appliance: HomeAppliance, program: Program
+) -> dict[int, str | int | bool]:
+    """
+    Collect a complete, well-formed option set for a program write.
+
+    The library derives the option list from each option's value_shadow, which
+    stays None until the appliance has reported a value. An appliance that wants
+    a full option set rejects the resulting {"uid": x, "value": None} entries, so
+    fall back to the current value and finally to the option's minimum. Options
+    that stay valueless even then are left out rather than sent as null.
+    """
+    options: dict[int, str | int | bool] = {}
+    for opt in program._options:  # noqa: SLF001
+        if opt.access != Access.READ_WRITE:
+            continue
+        if is_unplugged_probe(appliance, opt):
+            continue
+        value = opt.value_shadow
+        if value is None:
+            value = opt.value
+        if value is None and opt.min is not None:
+            # opt.min is typed float (generic XML min/max parsing), but the
+            # wire protocol only ever takes int/str/bool option values.
+            value = int(opt.min)
+        if value is None:
+            continue
+        options[opt.uid] = value
+    return options
 
 
 def error_decorator[T](
