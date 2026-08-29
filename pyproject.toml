@@ -21,7 +21,7 @@ dev = [
     "pre-commit==4.6.2",
     "mypy==2.3.1",
 ]
-lint = ["ruff==0.16.3"]
+lint = ["ruff==0.16.4"]
 test = [
     "pytest-homeassistant-custom-component==0.13.356",
     "pytest>=9.0.0",

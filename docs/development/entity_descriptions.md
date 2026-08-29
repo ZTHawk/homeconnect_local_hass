@@ -14,12 +14,12 @@ Fields common to every entity type:
 - `extra_attributes`: list of dicts mapping an attribute `name` to an HC `entity` (and optionally a `value_fn`) to expose as extra state attributes, e.g.
 
   ```python
-  extra_attributes=[
+  extra_attributes = [
       {
           "name": "Is Estimated",
           "entity": "BSH.Common.Option.RemainingProgramTimeIsEstimated",
       }
-  ],
+  ]
   ```
 
 - `clear_on_expected_offline`: for laundry appliances only — clears the entity's value to `None` instead of showing a stale reading while the appliance is in its expected-offline window (see [Known Limitations](../integration/support-and-troubleshooting.md#known-limitations) on the code-1000 clean-disconnect behavior)
