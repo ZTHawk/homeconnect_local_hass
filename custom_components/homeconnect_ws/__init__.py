@@ -190,6 +190,7 @@ async def async_setup_entry(
         identifiers={(DOMAIN, config_entry.unique_id)},
         model=f"{appliance.info.get('type')}",
         model_id=f"{appliance.info.get('vib')} / IP: {config_entry.data[CONF_HOST]}",
+        serial_number=appliance.info.get("serialNumber"),
         sw_version=appliance.info.get("swVersion"),
     )
 
