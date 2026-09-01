@@ -46,9 +46,12 @@ async def async_setup_entry(
     async_add_entites(entities)
 
 
+_OPERATION_STATE_ENTITY = "BSH.Common.Status.OperationState"
+_INACTIVE_OPERATION_STATES = frozenset({"inactive", "ready"})
+
 _HOOD_FAN_STATE_ENTITIES = (
     "BSH.Common.Root.ActiveProgram",
-    "BSH.Common.Status.OperationState",
+    _OPERATION_STATE_ENTITY,
 )
 
 
@@ -106,7 +109,17 @@ class HCFan(HCEntity, FanEntity):
 
     @property
     def is_on(self) -> bool:
-        if self._runtime_data.appliance.active_program is None:
+        appliance = self._runtime_data.appliance
+        # Some hoods keep reporting an active Venting program with a non-zero
+        # venting level after being switched off. OperationState is the
+        # authoritative signal in that case.
+        operation_state = appliance.entities.get(_OPERATION_STATE_ENTITY)
+        if (
+            operation_state is not None
+            and str(operation_state.value or "").lower() in _INACTIVE_OPERATION_STATES
+        ):
+            return False
+        if appliance.active_program is None:
             return False
         return any(entity.value_raw not in (None, 0) for entity in self._speed_entities.values())
 
