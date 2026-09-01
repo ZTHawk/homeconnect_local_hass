@@ -14,7 +14,13 @@ from homeassistant.util.percentage import percentage_to_ranged_value, ranged_val
 
 from .const import DOMAIN
 from .entity import HCEntity
-from .helpers import create_entities, entity_is_available, error_decorator
+from .helpers import (
+    build_full_option_set,
+    create_entities,
+    entity_is_available,
+    error_decorator,
+    needs_full_option_set,
+)
 
 if TYPE_CHECKING:
     from home_disconnect.entities import Entity as HcEntity
@@ -194,7 +200,17 @@ class HCFan(HCEntity, FanEntity):
         **kwargs: Any,
     ) -> None:
         if percentage is None:
-            await self._venting_program().start(options={}, override_options=True)
+            program = self._venting_program()
+            # Same 400 BadRequest as the start button / program select: an
+            # appliance whose ActiveProgram is flagged fullOptionSet validates
+            # a program write against the program's complete option set and
+            # rejects an empty one. Confirmed live on a Bosch hood.
+            options = (
+                build_full_option_set(self._runtime_data.appliance, program)
+                if needs_full_option_set(program)
+                else {}
+            )
+            await program.start(options, override_options=True)
         else:
             await self.async_set_percentage(int(percentage))
         self.async_write_ha_state()
