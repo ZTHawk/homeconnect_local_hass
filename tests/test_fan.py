@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import AsyncMock, Mock
 
+import pytest
 from home_disconnect.message import Action, Message
 from homeassistant.components.fan import (
     ATTR_PERCENTAGE,
@@ -21,6 +23,7 @@ from homeassistant.const import (
     STATE_OFF,
     STATE_ON,
 )
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
 from . import setup_config_entry
 from .const import MOCK_CONFIG_DATA
@@ -128,10 +131,20 @@ async def test_turn_off(
     mock_appliance: MockAppliance,
     patch_entity_description: None,
 ) -> None:
-    """Test turning off."""
+    """
+    Test turning off writes PowerState to its off value.
+
+    Neither writing 0 to the speed options nor DELETE /ro/activeProgram is
+    honoured by every hood - confirmed live on a DWK81AN60 (fork issue #17,
+    upstream #386/#387): DELETE is never answered at all, and the appliance
+    only actually stops in response to a PowerState write.
+    """
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
     await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
     await hass.async_block_till_done()
+
+    power_state = Mock(enum={0: "Off", 1: "On"}, min=None, max=None, set_value=AsyncMock())
+    mock_appliance.entities["BSH.Common.Setting.PowerState"] = power_state
 
     await hass.services.async_call(
         FAN_DOMAIN,
@@ -140,9 +153,85 @@ async def test_turn_off(
         blocking=True,
     )
 
-    mock_appliance.session.send_sync.assert_awaited_once_with(
-        Message(resource="/ro/activeProgram", action=Action.DELETE, data=[])
+    power_state.set_value.assert_awaited_once_with("Off")
+    mock_appliance.session.send_sync.assert_not_awaited()
+
+
+async def test_turn_off_no_power_off_available(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """Test turning off raises when PowerState can't be set to Off/MainsOff."""
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
+    await hass.async_block_till_done()
+
+    power_state = Mock(enum={1: "On", 2: "Standby"}, min=None, max=None, set_value=AsyncMock())
+    mock_appliance.entities["BSH.Common.Setting.PowerState"] = power_state
+
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            FAN_DOMAIN,
+            SERVICE_TURN_OFF,
+            {ATTR_ENTITY_ID: "fan.fake_brand_homeappliance_fan"},
+            blocking=True,
+        )
+
+    power_state.set_value.assert_not_awaited()
+
+
+async def test_turn_off_respects_settable_range(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """Test an Off enum member outside the entity's min/max range doesn't count."""
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
+    await hass.async_block_till_done()
+
+    # "Off" (0) is declared but outside the settable 1-2 range - matches
+    # generate_power_switch's own handling of this same entity.
+    power_state = Mock(enum={0: "Off", 1: "On", 2: "Standby"}, min=1, max=2, set_value=AsyncMock())
+    mock_appliance.entities["BSH.Common.Setting.PowerState"] = power_state
+
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            FAN_DOMAIN,
+            SERVICE_TURN_OFF,
+            {ATTR_ENTITY_ID: "fan.fake_brand_homeappliance_fan"},
+            blocking=True,
+        )
+
+    power_state.set_value.assert_not_awaited()
+
+
+async def test_turn_off_command_timeout(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """Test a PowerState write that never gets answered raises a clear error."""
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
+    await hass.async_block_till_done()
+
+    power_state = Mock(
+        enum={0: "Off", 1: "On"},
+        min=None,
+        max=None,
+        set_value=AsyncMock(side_effect=TimeoutError),
     )
+    mock_appliance.entities["BSH.Common.Setting.PowerState"] = power_state
+
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(
+            FAN_DOMAIN,
+            SERVICE_TURN_OFF,
+            {ATTR_ENTITY_ID: "fan.fake_brand_homeappliance_fan"},
+            blocking=True,
+        )
 
 
 async def test_turn_off_when_already_off(
