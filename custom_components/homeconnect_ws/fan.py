@@ -6,14 +6,13 @@ import math
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 from home_disconnect.entities import Access
-from home_disconnect.message import Action
-from home_disconnect.message import Message as HC_Message
 from homeassistant.components.fan import FanEntity, FanEntityFeature
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.util.percentage import percentage_to_ranged_value, ranged_value_to_percentage
 
 from .const import DOMAIN
 from .entity import HCEntity
+from .entity_descriptions.common import POWER_OFF_STATE_NAMES
 from .helpers import create_entities, entity_is_available, error_decorator
 
 if TYPE_CHECKING:
@@ -45,6 +44,8 @@ async def async_setup_entry(
     entities = create_entities({"fan": HCFan}, config_entry.runtime_data)
     async_add_entites(entities)
 
+
+_POWER_STATE_ENTITY = "BSH.Common.Setting.PowerState"
 
 _HOOD_FAN_STATE_ENTITIES = (
     "BSH.Common.Root.ActiveProgram",
@@ -205,11 +206,31 @@ class HCFan(HCEntity, FanEntity):
         if appliance.active_program is None:
             return
 
-        # Writing 0 to the speed options (the previous approach) is rejected
-        # by some hoods - confirmed live via debug log (fork issue #17): the
-        # appliance's confirmation echoes the option back at its old,
-        # non-zero value instead of accepting 0. Deleting the active program
-        # is the correct way to stop it, matching upstream issue #386.
-        message = HC_Message(resource="/ro/activeProgram", action=Action.DELETE, data=[])
-        await appliance.session.send_sync(message)
+        # A hood has no way to abort a running program: it exposes no
+        # AbortProgram command and its programs are all START_ONLY. Both
+        # other candidates are dead ends, confirmed live on a DWK81AN60 by
+        # reading the WebSocket debug log:
+        #   - DELETE /ro/activeProgram is never answered at all, so send_sync
+        #     waits for a response that cannot come and raises TimeoutError
+        #     (upstream issue #386 describes it working on other appliance
+        #     classes, so this stays appliance-specific).
+        #   - re-POSTing the venting program with VentingLevel=FanOff gets a
+        #     bare RESPONSE and is then silently dropped: no value notify
+        #     follows and the fan keeps spinning at its previous stage
+        #     (fork issue #17).
+        # Powering the appliance off is the only stop it honours, and it is
+        # the exact counterpart of starting a program, which the hood answers
+        # by switching PowerState to On by itself.
+        power_state = appliance.entities.get(_POWER_STATE_ENTITY)
+        off_value = None
+        if power_state is not None:
+            settable = set((power_state.enum or {}).values())
+            off_value = next((n for n in POWER_OFF_STATE_NAMES if n in settable), None)
+        if off_value is None:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="no_power_off",
+            )
+
+        await power_state.set_value(off_value)
         self.async_write_ha_state()

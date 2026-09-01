@@ -4062,6 +4062,12 @@
     },
     "not_connected": {
       "message": "Client is not Connected"
+    },
+    "no_power_off": {
+      "message": "This appliance cannot be switched off remotely, so the fan cannot be stopped"
+    },
+    "command_timeout": {
+      "message": "The appliance did not answer the command in time"
     }
   }
 }

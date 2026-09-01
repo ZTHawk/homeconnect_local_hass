@@ -187,5 +187,15 @@ def error_decorator[T](
                 translation_domain=DOMAIN,
                 translation_key="not_connected",
             ) from None
+        except TimeoutError:
+            # send_sync waits on a response queue that stays empty when the
+            # appliance never answers a message (an action it does not
+            # implement, or a connection that dropped mid-request). Without
+            # this the bare asyncio TimeoutError reaches the frontend as an
+            # opaque "unknown error".
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="command_timeout",
+            ) from None
 
     return wrap
