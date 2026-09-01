@@ -13,7 +13,13 @@ from homeassistant.util.percentage import percentage_to_ranged_value, ranged_val
 from .const import DOMAIN
 from .entity import HCEntity
 from .entity_descriptions.common import POWER_OFF_STATE_NAMES
-from .helpers import create_entities, entity_is_available, error_decorator
+from .helpers import (
+    build_full_option_set,
+    create_entities,
+    entity_is_available,
+    error_decorator,
+    needs_full_option_set,
+)
 
 if TYPE_CHECKING:
     from home_disconnect.entities import Entity as HcEntity
@@ -46,10 +52,12 @@ async def async_setup_entry(
 
 
 _POWER_STATE_ENTITY = "BSH.Common.Setting.PowerState"
+_OPERATION_STATE_ENTITY = "BSH.Common.Status.OperationState"
+_INACTIVE_OPERATION_STATES = frozenset({"inactive", "ready"})
 
 _HOOD_FAN_STATE_ENTITIES = (
     "BSH.Common.Root.ActiveProgram",
-    "BSH.Common.Status.OperationState",
+    _OPERATION_STATE_ENTITY,
 )
 
 
@@ -107,7 +115,17 @@ class HCFan(HCEntity, FanEntity):
 
     @property
     def is_on(self) -> bool:
-        if self._runtime_data.appliance.active_program is None:
+        appliance = self._runtime_data.appliance
+        # Some hoods keep reporting an active Venting program with a non-zero
+        # venting level after being switched off. OperationState is the
+        # authoritative signal in that case.
+        operation_state = appliance.entities.get(_OPERATION_STATE_ENTITY)
+        if (
+            operation_state is not None
+            and str(operation_state.value or "").lower() in _INACTIVE_OPERATION_STATES
+        ):
+            return False
+        if appliance.active_program is None:
             return False
         return any(entity.value_raw not in (None, 0) for entity in self._speed_entities.values())
 
@@ -195,7 +213,17 @@ class HCFan(HCEntity, FanEntity):
         **kwargs: Any,
     ) -> None:
         if percentage is None:
-            await self._venting_program().start(options={}, override_options=True)
+            program = self._venting_program()
+            # Same 400 BadRequest as the start button / program select: an
+            # appliance whose ActiveProgram is flagged fullOptionSet validates
+            # a program write against the program's complete option set and
+            # rejects an empty one. Confirmed live on a Bosch hood.
+            options = (
+                build_full_option_set(self._runtime_data.appliance, program)
+                if needs_full_option_set(program)
+                else {}
+            )
+            await program.start(options, override_options=True)
         else:
             await self.async_set_percentage(int(percentage))
         self.async_write_ha_state()

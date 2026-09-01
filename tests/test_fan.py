@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from home_disconnect.entities import Program
 from home_disconnect.message import Action, Message
 from homeassistant.components.fan import (
     ATTR_PERCENTAGE,
@@ -97,6 +98,38 @@ async def test_update(
     assert state.attributes[ATTR_PERCENTAGE] == 100
 
 
+async def test_is_on_false_when_operation_state_inactive(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    Test the fan reports off when OperationState says so, despite a stale program.
+
+    Some hoods keep reporting an active Venting program with a non-zero
+    venting level after being switched off - confirmed live on fork issue
+    #60. OperationState is the authoritative signal in that case.
+    """
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.ActiveProgram"].update({"value": 504})
+    await mock_appliance.entities["Test.FanSpeed1"].update({"value": 1})
+    await hass.async_block_till_done()
+
+    state = hass.states.get("fan.fake_brand_homeappliance_fan")
+    assert state.state == STATE_ON
+
+    mock_appliance.entities["BSH.Common.Status.OperationState"] = Mock(value="Inactive")
+    # Not itself subscribed (it wasn't present at entity setup), but is_on
+    # reads it fresh on every evaluation - re-triggering an already
+    # subscribed entity's callback (the fan only subscribes to its speed
+    # entities, not ActiveProgram) is enough to force a re-render.
+    await mock_appliance.entities["Test.FanSpeed1"].update({"value": 1})
+    await hass.async_block_till_done()
+
+    state = hass.states.get("fan.fake_brand_homeappliance_fan")
+    assert state.state == STATE_OFF
+
+
 async def test_turn_on(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
@@ -121,6 +154,48 @@ async def test_turn_on(
             data={
                 "program": 504,
                 "options": [],
+            },
+        )
+    )
+
+
+async def test_turn_on_full_option_set(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    Test turning on sends a complete option set for appliances that need one.
+
+    Same 400 BadRequest as the start button / program select: an appliance
+    whose ActiveProgram is flagged fullOptionSet validates a program write
+    against the program's complete option set and rejects an empty one.
+    Confirmed live on a Bosch hood, fork issue #17.
+    """
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.ActiveProgram"].update({"value": 0})
+    await mock_appliance.entities["Test.Option1"].update({"value": True})
+    await hass.async_block_till_done()
+
+    with patch.object(Program, "full_option_set", new=True, create=True):
+        await hass.services.async_call(
+            FAN_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: "fan.fake_brand_homeappliance_fan"},
+            blocking=True,
+        )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/activeProgram",
+            action=Action.POST,
+            data={
+                "program": 504,
+                "options": [
+                    {"uid": 401, "value": True},
+                    {"uid": 403, "value": 0},
+                    {"uid": 404, "value": 0},
+                ],
             },
         )
     )
