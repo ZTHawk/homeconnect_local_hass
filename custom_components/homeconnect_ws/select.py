@@ -11,6 +11,7 @@ from .entity import HCEntity
 from .helpers import (
     build_full_option_set,
     create_entities,
+    ensure_writable,
     entity_is_available,
     error_decorator,
     needs_full_option_set,
@@ -124,6 +125,7 @@ class HCSelect(HCEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         if self._entity is None:
             return
+        ensure_writable(self._entity)
         if self._rev_options:
             option = self._rev_options[option]
         await self._entity.set_value(option)

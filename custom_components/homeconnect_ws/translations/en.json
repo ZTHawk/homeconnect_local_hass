@@ -4063,6 +4063,9 @@
     "not_connected": {
       "message": "Client is not Connected"
     },
+    "read_only": {
+      "message": "This is currently in read-only mode and can't be changed right now"
+    },
     "no_power_off": {
       "message": "This appliance cannot be switched off remotely, so the fan cannot be stopped"
     },

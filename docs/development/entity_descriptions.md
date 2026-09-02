@@ -11,6 +11,9 @@ Fields common to every entity type:
 - `entity`: the name of the HC entity, e.g. `"BSH.Common.Status.DoorState"`
 - `entities`: for entity types that watch more than one HC entity
 - `available_access`: which `Access` values (`READ`, `READ_WRITE`, `WRITE_ONLY`) count as "available"; each platform sets its own sensible default
+
+  There's one automatic exception to this: an `Option` entity (as opposed to a `Setting`) whose access is currently `READ` is always shown as available, with `readonly: True` added to its extra state attributes, and its platform's write action (`switch`/`select`/`number`) raises a clear `ServiceValidationError` instead of attempting a write it would reject. Home Connect appliances lock some Options to read-only while a program runs rather than making them unavailable - the official app shows them as visible-but-disabled, not hidden - confirmed live on fork issue #59. This only applies to `Access.READ`, not `Access.NONE` (which means "not applicable at all right now" and should stay genuinely unavailable), and it's automatic based on the underlying HC entity's own class - no entity description field controls it.
+
 - `extra_attributes`: list of dicts mapping an attribute `name` to an HC `entity` (and optionally a `value_fn`) to expose as extra state attributes, e.g.
 
   ```python

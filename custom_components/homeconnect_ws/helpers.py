@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from home_disconnect.entities import Access
+from home_disconnect.entities import Access, Option
 from home_disconnect.errors import AccessError, CodeResponsError, NotConnectedError
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.service import async_extract_config_entry_ids
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from home_disconnect import HomeAppliance
     from home_disconnect.entities import Entity as HcEntity
-    from home_disconnect.entities import Option, Program
+    from home_disconnect.entities import Program
     from homeassistant.core import HomeAssistant, ServiceCall
 
     from . import HCConfigEntry, HCData
@@ -113,6 +113,29 @@ def entity_is_available(
     if entity is not None and available_access is not None and hasattr(entity, "access"):
         available &= entity.access in available_access
     return available
+
+
+def is_locked_option(entity: HcEntity | None) -> bool:
+    """
+    Whether entity is a program Option currently locked read-only, not just inapplicable.
+
+    Options are the class of HC entities whose write access depends on which
+    program is active - Home Connect itself shows these as visible-but-disabled
+    on the appliance's own panel/app rather than hiding them, confirmed live on
+    fork issue #59. Access.READ specifically means "still readable, just not
+    writable right now" - Access.NONE means "not applicable at all", which
+    should stay genuinely unavailable rather than shown as read-only.
+    """
+    return isinstance(entity, Option) and entity.access == Access.READ
+
+
+def ensure_writable(entity: HcEntity | None) -> None:
+    """Raise a clear error instead of silently attempting a write a locked Option will reject."""
+    if is_locked_option(entity):
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="read_only",
+        )
 
 
 def needs_full_option_set(program: Program) -> bool:
