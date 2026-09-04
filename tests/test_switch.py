@@ -250,7 +250,10 @@ async def test_available_and_readonly_when_option_locked(
     Confirmed live on fork issue #59: Home Connect locks some Options (e.g.
     iDos1) to read-only while a program runs rather than making them
     unavailable - the entity should keep showing its current state and flag
-    itself as readonly, not disappear.
+    itself as readonly, not disappear. `readonly` is always present (as
+    False) on an Option-backed entity, not just when it's actually locked -
+    per feedback on #59, a custom card/template shouldn't have to treat a
+    missing attribute as meaning "not readonly".
     """
     entity_id = "switch.fake_brand_homeappliance_switch_option"
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -259,7 +262,7 @@ async def test_available_and_readonly_when_option_locked(
 
     state = hass.states.get(entity_id)
     assert state.state == STATE_ON
-    assert "readonly" not in state.attributes
+    assert state.attributes["readonly"] is False
 
     await mock_appliance.entities["Test.Option1"].update({"access": "read"})
     await hass.async_block_till_done()
