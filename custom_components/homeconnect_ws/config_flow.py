@@ -373,6 +373,10 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             await appliance.connect()
             await wait_for(event.wait(), timeout=20)
             self.data[CONF_DESCRIPTION]["info"].update(appliance.info)
+            if self.unique_id is None:
+                # The setup-from-dump path skips async_step_device_select,
+                # the only other place a unique_id gets set.
+                await self.async_set_unique_id(appliance.info["deviceID"])
 
         except ClientConnectorSSLError as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
