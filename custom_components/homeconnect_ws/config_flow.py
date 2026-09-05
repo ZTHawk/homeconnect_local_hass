@@ -407,6 +407,14 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         finally:
             await appliance.close()
         if self.errors:
+            if not self.data.get(CONF_MANUAL_HOST, False):
+                # This attempt used the automatically-guessed mDNS-style
+                # host (initial setup's own guess, or async_step_
+                # reconfigure_connection's), not one the user actually
+                # typed in - say so, rather than implying they entered
+                # something wrong when they haven't been asked for
+                # anything yet.
+                self.errors["base"] = "cannot_connect_automatic"
             _LOGGER.debug("Connection error, showing host step")
             return await self.async_step_host()
         _LOGGER.debug("config vaild, adding config entry")

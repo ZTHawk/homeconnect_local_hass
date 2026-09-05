@@ -57,6 +57,7 @@
     },
     "error": {
       "cannot_connect": "Connection to Appliance failed",
+      "cannot_connect_automatic": "Automatic (mDNS) connection failed - enter your Appliance's IP-Address or hostname manually",
       "already_configured": "This Appliance is already configured"
     },
     "abort": {

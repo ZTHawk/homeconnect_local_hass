@@ -107,7 +107,7 @@ async def test_reconfigure_connection_falls_back_to_manual_host(
     )
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "host"
-    assert result["errors"]["base"] == "cannot_connect"
+    assert result["errors"]["base"] == "cannot_connect_automatic"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
