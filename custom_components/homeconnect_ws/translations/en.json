@@ -47,19 +47,11 @@
           "reconfigure_profile": "Update Profile File"
         }
       },
-      "reconfigure_connection": {
-        "title": "Change Connection",
-        "description": "By default, this Appliance's address is kept up to date automatically (mDNS). Turn on manual mode if mDNS isn't available on your network, or to pin the Appliance to a fixed IP-Address.",
-        "data": {
-          "manual_host": "Use a fixed IP-Address instead of automatic discovery",
-          "host": "Host / IP-Address"
-        }
-      },
       "reconfigure_profile": {
         "title": "Update Profile File",
-        "description": "Upload a fresh Profile file for this Appliance. Use this after a firmware update added new features, or after unpairing and re-pairing the Appliance with Home Connect (which changes its encryption key).",
-        "data": {
-          "file": "Profile file"
+        "menu_options": {
+          "legacy_oauth_region": "Sign in with Home Connect",
+          "upload": "Upload Profile File"
         }
       }
     },

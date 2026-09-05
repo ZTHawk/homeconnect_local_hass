@@ -97,12 +97,6 @@ CONFIG_HOST_SCHEMA = vol.Schema(
         vol.Required(CONF_HOST): cv.string,
     }
 )
-RECONFIGURE_CONNECTION_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_MANUAL_HOST): cv.boolean,
-        vol.Required(CONF_HOST): cv.string,
-    }
-)
 REGION_LABELS = {"EU": "Europe", "NA": "North America", "CN": "China"}
 CONFIG_REGION_SCHEMA = vol.Schema(
     {
@@ -254,6 +248,11 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_abort(
                     reason="oauth_fetch_failed", description_placeholders={"error": str(err)}
                 )
+            if self.unique_id:
+                # Reauth/reconfigure already know which Appliance this is -
+                # device_select is for picking a *new* one and would filter
+                # this one out as already configured.
+                return await self.async_step_set_data()
             return await self.async_step_device_select()
 
         authorize_url = legacy_build_authorize_url(
@@ -464,68 +463,54 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             menu_options=["reconfigure_connection", "reconfigure_profile"],
         )
 
+    def _auto_host(self) -> str:
+        """Derive this Appliance's mDNS-resolvable name, the same way initial setup does."""
+        info = self.data[CONF_DESCRIPTION]["info"]
+        if self.data[CONF_MODE] == "TLS":
+            return f"{info['brand']}-{info['type']}-{info['deviceID']}"
+        return cast("str", info["deviceID"])
+
     async def async_step_reconfigure_connection(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Switch between automatic (mDNS) discovery and a fixed IP address."""
-        reconfigure_entry = self._get_reconfigure_entry()
-        if user_input is not None:
-            self.data = deepcopy(dict(reconfigure_entry.data))
-            self.data[CONF_MANUAL_HOST] = user_input[CONF_MANUAL_HOST]
-            self.data[CONF_HOST] = user_input[CONF_HOST]
-            return await self.async_step_test_connection()
+        """
+        Switch between automatic (mDNS) discovery and a fixed IP address.
 
-        schema = self.add_suggested_values_to_schema(
-            RECONFIGURE_CONNECTION_SCHEMA,
-            {
-                CONF_MANUAL_HOST: reconfigure_entry.data.get(CONF_MANUAL_HOST, False),
-                CONF_HOST: reconfigure_entry.data[CONF_HOST],
-            },
-        )
-        return self.async_show_form(
-            step_id="reconfigure_connection", data_schema=schema, errors=self.errors
-        )
+        Tries automatic discovery first and only asks for a fixed IP-Address
+        on failure, exactly like initial setup - async_step_test_connection
+        already falls back to async_step_host for that. There's deliberately
+        no "manual anyway, even though automatic would work" option here,
+        matching initial setup's own behavior.
+        """
+        reconfigure_entry = self._get_reconfigure_entry()
+        self.data = deepcopy(dict(reconfigure_entry.data))
+        self.data[CONF_MANUAL_HOST] = False
+        self.data[CONF_HOST] = self._auto_host()
+        return await self.async_step_test_connection()
 
     async def async_step_reconfigure_profile(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """
-        Re-upload a profile file to refresh this Appliance's description and keys.
+        Refresh this Appliance's profile via a new upload or a fresh Home Connect sign-in.
 
         Covers two cases a fresh upload but not a full migration can't: new
         Options/Settings a firmware update added (only present in a newly
         exported profile file) and a new encryption key after the Appliance
         was unpaired and re-paired with Home Connect.
+
+        Reuses the same legacy_oauth_region/upload steps initial setup and
+        reauth use, rather than a bespoke upload-only form - so a user who
+        set up via Home Connect sign-in isn't forced to find their old
+        profile-download file just to refresh it.
         """
         reconfigure_entry = self._get_reconfigure_entry()
-        if user_input is not None:
-            try:
-                appliances = await self.hass.async_add_executor_job(
-                    self._process_profile_file, user_input[CONF_FILE]
-                )
-            except ParserError as exc:
-                return self.async_abort(
-                    reason="profile_file_parser_error",
-                    description_placeholders={"error": exc.args[0]},
-                )
-            except (KeyError, ValueError):
-                return self.async_abort(reason="invalid_profile_file")
-
-            if reconfigure_entry.unique_id not in appliances:
-                return self.async_abort(reason="appliance_not_in_profile_file")
-
-            try:
-                appliance = appliances[reconfigure_entry.unique_id]
-                self.data = deepcopy(dict(reconfigure_entry.data))
-                self.data[CONF_DESCRIPTION] = appliance["description"]
-                self._set_encryption_keys(appliance["info"])
-            except (KeyError, ValueError):
-                return self.async_abort(reason="invalid_profile_file")
-
-            return await self.async_step_test_connection()
-
-        return self.async_show_form(
-            step_id="reconfigure_profile", data_schema=CONFIG_FILE_SCHEMA, errors=self.errors
+        self.global_config = self.hass.data.get(HC_KEY)
+        self.data = deepcopy(dict(reconfigure_entry.data))
+        await self.async_set_unique_id(reconfigure_entry.unique_id)
+        return self.async_show_menu(
+            step_id="reconfigure_profile",
+            menu_options=["legacy_oauth_region", "upload"],
         )
 
     async def async_step_set_data(
