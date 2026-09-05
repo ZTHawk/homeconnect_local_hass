@@ -28,7 +28,13 @@ from home_disconnect import (
 )
 from homeassistant.components.file_upload import process_uploaded_file
 from homeassistant.components.http.auth import async_sign_path
-from homeassistant.config_entries import SOURCE_IGNORE, ConfigEntryState, ConfigFlow, OptionsFlow
+from homeassistant.config_entries import (
+    SOURCE_IGNORE,
+    SOURCE_RECONFIGURE,
+    ConfigEntryState,
+    ConfigFlow,
+    OptionsFlow,
+)
 from homeassistant.const import (
     CONF_DESCRIPTION,
     CONF_DEVICE,
@@ -88,6 +94,12 @@ CONFIG_FILE_SCHEMA_JSON = vol.Schema(
 )
 CONFIG_HOST_SCHEMA = vol.Schema(
     {
+        vol.Required(CONF_HOST): cv.string,
+    }
+)
+RECONFIGURE_CONNECTION_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_MANUAL_HOST): cv.boolean,
         vol.Required(CONF_HOST): cv.string,
     }
 )
@@ -420,10 +432,15 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
-        """Create an config entry or update existing entry for reauth."""
+        """Create an config entry or update existing entry for reauth/reconfigure."""
         if self.reauth_entry:
             return self.async_update_reload_and_abort(
                 self.reauth_entry,
+                data_updates=data,
+            )
+        if self.source == SOURCE_RECONFIGURE:
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
                 data_updates=data,
             )
         return self.async_create_entry(title=data[CONF_NAME], data=data)
@@ -436,6 +453,80 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="reauth_entry_not_found")
         self.data[CONF_HOST] = self.reauth_entry.data[CONF_HOST]
         return await self.async_step_user()
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle a reconfigure flow, initiated from the config entry's own menu."""
+        self.global_config = self.hass.data.get(HC_KEY)
+        return self.async_show_menu(
+            step_id="reconfigure",
+            menu_options=["reconfigure_connection", "reconfigure_profile"],
+        )
+
+    async def async_step_reconfigure_connection(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Switch between automatic (mDNS) discovery and a fixed IP address."""
+        reconfigure_entry = self._get_reconfigure_entry()
+        if user_input is not None:
+            self.data = deepcopy(dict(reconfigure_entry.data))
+            self.data[CONF_MANUAL_HOST] = user_input[CONF_MANUAL_HOST]
+            self.data[CONF_HOST] = user_input[CONF_HOST]
+            return await self.async_step_test_connection()
+
+        schema = self.add_suggested_values_to_schema(
+            RECONFIGURE_CONNECTION_SCHEMA,
+            {
+                CONF_MANUAL_HOST: reconfigure_entry.data.get(CONF_MANUAL_HOST, False),
+                CONF_HOST: reconfigure_entry.data[CONF_HOST],
+            },
+        )
+        return self.async_show_form(
+            step_id="reconfigure_connection", data_schema=schema, errors=self.errors
+        )
+
+    async def async_step_reconfigure_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """
+        Re-upload a profile file to refresh this Appliance's description and keys.
+
+        Covers two cases a fresh upload but not a full migration can't: new
+        Options/Settings a firmware update added (only present in a newly
+        exported profile file) and a new encryption key after the Appliance
+        was unpaired and re-paired with Home Connect.
+        """
+        reconfigure_entry = self._get_reconfigure_entry()
+        if user_input is not None:
+            try:
+                appliances = await self.hass.async_add_executor_job(
+                    self._process_profile_file, user_input[CONF_FILE]
+                )
+            except ParserError as exc:
+                return self.async_abort(
+                    reason="profile_file_parser_error",
+                    description_placeholders={"error": exc.args[0]},
+                )
+            except (KeyError, ValueError):
+                return self.async_abort(reason="invalid_profile_file")
+
+            if reconfigure_entry.unique_id not in appliances:
+                return self.async_abort(reason="appliance_not_in_profile_file")
+
+            try:
+                appliance = appliances[reconfigure_entry.unique_id]
+                self.data = deepcopy(dict(reconfigure_entry.data))
+                self.data[CONF_DESCRIPTION] = appliance["description"]
+                self._set_encryption_keys(appliance["info"])
+            except (KeyError, ValueError):
+                return self.async_abort(reason="invalid_profile_file")
+
+            return await self.async_step_test_connection()
+
+        return self.async_show_form(
+            step_id="reconfigure_profile", data_schema=CONFIG_FILE_SCHEMA, errors=self.errors
+        )
 
     async def async_step_set_data(
         self, user_input: dict[str, Any] | None = None
