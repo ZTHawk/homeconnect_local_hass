@@ -11,15 +11,20 @@ Fields common to every entity type:
 - `entity`: the name of the HC entity, e.g. `"BSH.Common.Status.DoorState"`
 - `entities`: for entity types that watch more than one HC entity
 - `available_access`: which `Access` values (`READ`, `READ_WRITE`, `WRITE_ONLY`) count as "available"; each platform sets its own sensible default
+
+  There's one automatic exception to this: an `Option` entity (as opposed to a `Setting`) whose access is currently `READ` is always shown as available, and its platform's write action (`switch`/`select`/`number`) raises a clear `ServiceValidationError` instead of attempting a write it would reject. Home Connect appliances lock some Options to read-only while a program runs rather than making them unavailable - the official app shows them as visible-but-disabled, not hidden - confirmed live on fork issue #59. This only applies to `Access.READ`, not `Access.NONE` (which means "not applicable at all right now" and should stay genuinely unavailable), and it's automatic based on the underlying HC entity's own class - no entity description field controls it.
+
+  Every `Option`-backed entity also always carries a `readonly` extra state attribute (`true`/`false`) reflecting this, whether or not it's currently locked - not just when `true` - so a template or custom card can rely on it existing rather than treating a missing attribute as "not readonly" (feedback from issue #59). Entities that could never be an `Option` (a plain sensor, a `Setting`-backed switch, etc.) don't get the attribute at all, since the concept doesn't apply to them.
+
 - `extra_attributes`: list of dicts mapping an attribute `name` to an HC `entity` (and optionally a `value_fn`) to expose as extra state attributes, e.g.
 
   ```python
-  extra_attributes=[
+  extra_attributes = [
       {
           "name": "Is Estimated",
           "entity": "BSH.Common.Option.RemainingProgramTimeIsEstimated",
       }
-  ],
+  ]
   ```
 
 - `clear_on_expected_offline`: for laundry appliances only — clears the entity's value to `None` instead of showing a stale reading while the appliance is in its expected-offline window (see [Known Limitations](../integration/support-and-troubleshooting.md#known-limitations) on the code-1000 clean-disconnect behavior)
@@ -72,7 +77,7 @@ No HC-specific extra fields — use HA's own inherited `NumberEntityDescription`
 
 ## Development Options
 
-This integration has development-only options for use with the [HomeConnect Websocket Simulator](https://github.com/chris-mc1/homeconnect_ws_sim/). Set these in `configuration.yaml`:
+This integration has development-only options for use with the [HomeConnect Websocket Simulator](https://github.com/vemboy200/homeconnect_ws_sim/) (a fork retargeted to depend on this project's [home-disconnect](https://github.com/vemboy200/home-disconnect) library instead of the unmaintained original). Set these in `configuration.yaml`:
 
 ```yaml
 homeconnect_ws:

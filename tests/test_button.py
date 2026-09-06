@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
+from home_disconnect.entities import Program
 from home_disconnect.message import Action, Message
 from homeassistant.components.button import DOMAIN as BUTTON_DOMAIN
 from homeassistant.components.button import SERVICE_PRESS
@@ -63,6 +65,44 @@ async def test_start(
             data={
                 "program": 500,
                 "options": [{"uid": 401, "value": None}, {"uid": 402, "value": None}],
+            },
+        )
+    )
+
+
+async def test_start_full_option_set(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    Pressing start builds a well-formed option set for appliances that need one.
+
+    Confirmed live on a Siemens CoffeeMaker and a NEFF oven: sending the raw
+    (possibly None) shadow value of every option, like the plain start() call
+    above does, gets rejected with a 400. Options with no value and no min
+    (like these) are dropped entirely instead of sent as null.
+    """
+    entity_id = "button.fake_brand_homeappliance_activeprogram"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.SelectedProgram"].update({"value": 500})
+    await hass.async_block_till_done()
+
+    with patch.object(Program, "full_option_set", new=True, create=True):
+        await hass.services.async_call(
+            domain=BUTTON_DOMAIN,
+            service=SERVICE_PRESS,
+            service_data={ATTR_ENTITY_ID: entity_id},
+            blocking=True,
+        )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/activeProgram",
+            action=Action.POST,
+            data={
+                "program": 500,
+                "options": [],
             },
         )
     )

@@ -6,6 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from home_disconnect.entities import Access, Option
 from home_disconnect.errors import AccessError, CodeResponsError, NotConnectedError
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.service import async_extract_config_entry_ids
@@ -17,8 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from home_disconnect import HomeAppliance
-    from home_disconnect.entities import Access
     from home_disconnect.entities import Entity as HcEntity
+    from home_disconnect.entities import Program
     from homeassistant.core import HomeAssistant, ServiceCall
 
     from . import HCConfigEntry, HCData
@@ -114,6 +115,82 @@ def entity_is_available(
     return available
 
 
+def is_option(entity: HcEntity | None) -> bool:
+    """Whether entity is a program Option at all, regardless of its current access."""
+    return isinstance(entity, Option)
+
+
+def is_locked_option(entity: HcEntity | None) -> bool:
+    """
+    Whether entity is a program Option currently locked read-only, not just inapplicable.
+
+    Options are the class of HC entities whose write access depends on which
+    program is active - Home Connect itself shows these as visible-but-disabled
+    on the appliance's own panel/app rather than hiding them, confirmed live on
+    fork issue #59. Access.READ specifically means "still readable, just not
+    writable right now" - Access.NONE means "not applicable at all", which
+    should stay genuinely unavailable rather than shown as read-only.
+    """
+    return isinstance(entity, Option) and entity.access == Access.READ
+
+
+def ensure_writable(entity: HcEntity | None) -> None:
+    """Raise a clear error instead of silently attempting a write a locked Option will reject."""
+    if is_locked_option(entity):
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="read_only",
+        )
+
+
+def needs_full_option_set(program: Program) -> bool:
+    """Whether this appliance expects program and options as one complete write."""
+    return program.full_option_set
+
+
+def is_unplugged_probe(appliance: HomeAppliance, option: Option) -> bool:
+    """
+    Whether option is a meat probe setpoint while no probe is plugged in.
+
+    Supplying it anyway makes the appliance reject the entire program write.
+    """
+    if "MeatProbeTemperature" not in option.name:
+        return False
+    plugged = appliance.status.get("Cooking.Oven.Status.MeatprobePlugged")
+    return not bool(getattr(plugged, "value", False))
+
+
+def build_full_option_set(
+    appliance: HomeAppliance, program: Program
+) -> dict[int, str | int | bool]:
+    """
+    Collect a complete, well-formed option set for a program write.
+
+    The library derives the option list from each option's value_shadow, which
+    stays None until the appliance has reported a value. An appliance that wants
+    a full option set rejects the resulting {"uid": x, "value": None} entries, so
+    fall back to the current value and finally to the option's minimum. Options
+    that stay valueless even then are left out rather than sent as null.
+    """
+    options: dict[int, str | int | bool] = {}
+    for opt in program._options:  # noqa: SLF001
+        if opt.access != Access.READ_WRITE:
+            continue
+        if is_unplugged_probe(appliance, opt):
+            continue
+        value = opt.value_shadow
+        if value is None:
+            value = opt.value
+        if value is None and opt.min is not None:
+            # opt.min is typed float (generic XML min/max parsing), but the
+            # wire protocol only ever takes int/str/bool option values.
+            value = int(opt.min)
+        if value is None:
+            continue
+        options[opt.uid] = value
+    return options
+
+
 def error_decorator[T](
     func: Callable[..., Coroutine[Any, Any, T]],
 ) -> Callable[..., Coroutine[Any, Any, T]]:
@@ -137,6 +214,16 @@ def error_decorator[T](
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="not_connected",
+            ) from None
+        except TimeoutError:
+            # send_sync waits on a response queue that stays empty when the
+            # appliance never answers a message (an action it does not
+            # implement, or a connection that dropped mid-request). Without
+            # this the bare asyncio TimeoutError reaches the frontend as an
+            # opaque "unknown error".
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="command_timeout",
             ) from None
 
     return wrap

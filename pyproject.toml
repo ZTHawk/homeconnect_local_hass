@@ -1,11 +1,11 @@
 [project]
-version = "1.7.0rc1"
+version = "1.7.0"
 name = "homeconnect_ws"
 authors = [{ name = "chris-mc1" }, { name = "vemboy200" }]
 description = "Home Connect Local for Homeassistant"
 readme = "README.md"
 requires-python = ">=3.14.2"
-dependencies = ["home-disconnect==1.6.0b3"]
+dependencies = ["home-disconnect==1.7.0b0"]
 
 [project.urls]
 Homepage = "https://github.com/vemboy200/homeconnect_local_hass"
@@ -21,7 +21,7 @@ dev = [
     "pre-commit==4.6.2",
     "mypy==2.3.1",
 ]
-lint = ["ruff==0.16.3"]
+lint = ["ruff==0.16.4"]
 test = [
     "pytest-homeassistant-custom-component==0.13.356",
     "pytest>=9.0.0",

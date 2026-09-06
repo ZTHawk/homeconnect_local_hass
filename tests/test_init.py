@@ -15,11 +15,12 @@ from home_disconnect.testutils import MockAppliance
 from homeassistant.config_entries import SOURCE_ZEROCONF, ConfigEntryState
 from homeassistant.const import CONF_DESCRIPTION, CONF_HOST
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from .const import DEVICE_DESCRIPTION, MOCK_CONFIG_DATA, MOCK_TLS_DEVICE_ID
+from .const import DEVICE_DESCRIPTION, MOCK_APPLIANCE_INFO, MOCK_CONFIG_DATA, MOCK_TLS_DEVICE_ID
 
 if TYPE_CHECKING:
     import pytest
@@ -65,6 +66,29 @@ async def test_load_unload_entry(
     assert entry.state is ConfigEntryState.NOT_LOADED
 
     appliance.session.close.assert_awaited_once()
+
+
+async def test_device_registry_serial_number(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test the device registry entry exposes the appliance's serial number."""
+    appliance = MockAppliance(DEVICE_DESCRIPTION, "host", "mock_app", "mock_app_id", "PSK_KEY")
+    monkeypatch.setattr(coordinator, "HomeAppliance", Mock(return_value=appliance))
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=MOCK_CONFIG_DATA,
+        unique_id=MOCK_TLS_DEVICE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.unique_id)})
+    assert device is not None
+    assert device.serial_number == MOCK_APPLIANCE_INFO["serialNumber"]
 
 
 async def test_setup_entry_washer_connect_failure_is_non_blocking(

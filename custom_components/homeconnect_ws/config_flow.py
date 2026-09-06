@@ -18,15 +18,23 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from aiohttp import ClientConnectionError, ClientConnectorSSLError
 from home_disconnect import (
+    AuthenticationError,
     ConnectionFailedError,
     ConnectionState,
+    HCHandshakeError,
     HomeAppliance,
     ParserError,
     parse_device_description,
 )
 from homeassistant.components.file_upload import process_uploaded_file
 from homeassistant.components.http.auth import async_sign_path
-from homeassistant.config_entries import SOURCE_IGNORE, ConfigEntryState, ConfigFlow, OptionsFlow
+from homeassistant.config_entries import (
+    SOURCE_IGNORE,
+    SOURCE_RECONFIGURE,
+    ConfigEntryState,
+    ConfigFlow,
+    OptionsFlow,
+)
 from homeassistant.const import (
     CONF_DESCRIPTION,
     CONF_DEVICE,
@@ -240,6 +248,11 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_abort(
                     reason="oauth_fetch_failed", description_placeholders={"error": str(err)}
                 )
+            if self.unique_id:
+                # Reauth/reconfigure already know which Appliance this is -
+                # device_select is for picking a *new* one and would filter
+                # this one out as already configured.
+                return await self.async_step_set_data()
             return await self.async_step_device_select()
 
         authorize_url = legacy_build_authorize_url(
@@ -371,6 +384,10 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             await appliance.connect()
             await wait_for(event.wait(), timeout=20)
             self.data[CONF_DESCRIPTION]["info"].update(appliance.info)
+            if self.unique_id is None:
+                # The setup-from-dump path skips async_step_device_select,
+                # the only other place a unique_id gets set.
+                await self.async_set_unique_id(appliance.info["deviceID"])
 
         except ClientConnectorSSLError as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
@@ -381,12 +398,23 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         except BinasciiError as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
             return self.async_abort(reason="auth_failed")
-        except (TimeoutError, ClientConnectionError, ConnectionFailedError) as ex:
+        except AuthenticationError as ex:
+            _LOGGER.debug("validate_config failed: %s", ex)
+            return self.async_abort(reason="auth_failed")
+        except (TimeoutError, ClientConnectionError, ConnectionFailedError, HCHandshakeError) as ex:
             _LOGGER.debug("validate_config failed: %s", ex)
             self.errors["base"] = "cannot_connect"
         finally:
             await appliance.close()
         if self.errors:
+            if not self.data.get(CONF_MANUAL_HOST, False):
+                # This attempt used the automatically-guessed mDNS-style
+                # host (initial setup's own guess, or async_step_
+                # reconfigure_connection's), not one the user actually
+                # typed in - say so, rather than implying they entered
+                # something wrong when they haven't been asked for
+                # anything yet.
+                self.errors["base"] = "cannot_connect_automatic"
             _LOGGER.debug("Connection error, showing host step")
             return await self.async_step_host()
         _LOGGER.debug("config vaild, adding config entry")
@@ -411,10 +439,15 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_create_entry(self, data: dict[str, Any]) -> ConfigFlowResult:
-        """Create an config entry or update existing entry for reauth."""
+        """Create an config entry or update existing entry for reauth/reconfigure."""
         if self.reauth_entry:
             return self.async_update_reload_and_abort(
                 self.reauth_entry,
+                data_updates=data,
+            )
+        if self.source == SOURCE_RECONFIGURE:
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
                 data_updates=data,
             )
         return self.async_create_entry(title=data[CONF_NAME], data=data)
@@ -427,6 +460,66 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="reauth_entry_not_found")
         self.data[CONF_HOST] = self.reauth_entry.data[CONF_HOST]
         return await self.async_step_user()
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle a reconfigure flow, initiated from the config entry's own menu."""
+        self.global_config = self.hass.data.get(HC_KEY)
+        return self.async_show_menu(
+            step_id="reconfigure",
+            menu_options=["reconfigure_connection", "reconfigure_profile"],
+        )
+
+    def _auto_host(self) -> str:
+        """Derive this Appliance's mDNS-resolvable name, the same way initial setup does."""
+        info = self.data[CONF_DESCRIPTION]["info"]
+        if self.data[CONF_MODE] == "TLS":
+            return f"{info['brand']}-{info['type']}-{info['deviceID']}"
+        return cast("str", info["deviceID"])
+
+    async def async_step_reconfigure_connection(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """
+        Switch between automatic (mDNS) discovery and a fixed IP address.
+
+        Tries automatic discovery first and only asks for a fixed IP-Address
+        on failure, exactly like initial setup - async_step_test_connection
+        already falls back to async_step_host for that. There's deliberately
+        no "manual anyway, even though automatic would work" option here,
+        matching initial setup's own behavior.
+        """
+        reconfigure_entry = self._get_reconfigure_entry()
+        self.data = deepcopy(dict(reconfigure_entry.data))
+        self.data[CONF_MANUAL_HOST] = False
+        self.data[CONF_HOST] = self._auto_host()
+        return await self.async_step_test_connection()
+
+    async def async_step_reconfigure_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """
+        Refresh this Appliance's profile via a new upload or a fresh Home Connect sign-in.
+
+        Covers two cases a fresh upload but not a full migration can't: new
+        Options/Settings a firmware update added (only present in a newly
+        exported profile file) and a new encryption key after the Appliance
+        was unpaired and re-paired with Home Connect.
+
+        Reuses the same legacy_oauth_region/upload steps initial setup and
+        reauth use, rather than a bespoke upload-only form - so a user who
+        set up via Home Connect sign-in isn't forced to find their old
+        profile-download file just to refresh it.
+        """
+        reconfigure_entry = self._get_reconfigure_entry()
+        self.global_config = self.hass.data.get(HC_KEY)
+        self.data = deepcopy(dict(reconfigure_entry.data))
+        await self.async_set_unique_id(reconfigure_entry.unique_id)
+        return self.async_show_menu(
+            step_id="reconfigure_profile",
+            menu_options=["legacy_oauth_region", "upload"],
+        )
 
     async def async_step_set_data(
         self, user_input: dict[str, Any] | None = None
