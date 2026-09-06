@@ -39,15 +39,31 @@
         "data": {
           "host": "Host / IP-Adresse"
         }
+      },
+      "reconfigure": {
+        "title": "Gerät neu konfigurieren",
+        "menu_options": {
+          "reconfigure_connection": "Verbindung ändern",
+          "reconfigure_profile": "Profildatei aktualisieren"
+        }
+      },
+      "reconfigure_profile": {
+        "title": "Profildatei aktualisieren",
+        "menu_options": {
+          "legacy_oauth_region": "Mit Home Connect anmelden",
+          "upload": "Profildatei hochladen"
+        }
       }
     },
     "error": {
       "cannot_connect": "Verbindung zum Gerät fehlgeschlagen",
+      "cannot_connect_automatic": "Automatische Verbindung (mDNS) fehlgeschlagen - geben Sie die IP-Adresse oder den Hostnamen Ihres Geräts manuell ein",
       "already_configured": "Dieses Gerät ist bereits konfiguriert"
     },
     "abort": {
       "auth_failed": "Authentifizierung fehlgeschlagen",
       "reauth_successful": "Erneute Authentifizierung war erfolgreich",
+      "reconfigure_successful": "Neukonfiguration erfolgreich",
       "invalid_profile_file": "Profildatei ist ungültig",
       "profile_file_parser_error": "Profildatei ist ungültig: {error}",
       "appliance_not_in_profile_file": "Profildatei enthält kein Profil für dieses Gerät",
