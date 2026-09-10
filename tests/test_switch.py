@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
+import pytest
 from custom_components.homeconnect_ws import HCData
 from custom_components.homeconnect_ws.entity_descriptions.descriptions_definitions import (
     HCSwitchEntityDescription,
@@ -21,6 +22,7 @@ from homeassistant.const import (
     STATE_ON,
     STATE_UNKNOWN,
 )
+from homeassistant.exceptions import ServiceValidationError
 
 from . import setup_config_entry
 from .const import MOCK_CONFIG_DATA
@@ -32,8 +34,8 @@ if TYPE_CHECKING:
 
 async def test_setup(
     hass: HomeAssistant,
-    mock_appliance: MockAppliance,  # noqa: ARG001
-    patch_entity_description: None,  # noqa: ARG001
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
 ) -> None:
     """Test setting up entity."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
@@ -54,7 +56,7 @@ async def test_setup(
 async def test_update(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -78,7 +80,7 @@ async def test_update(
 async def test_update_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test updating entity with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"
@@ -102,7 +104,7 @@ async def test_update_enum(
 async def test_turn_on(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning on."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -127,7 +129,7 @@ async def test_turn_on(
 async def test_turn_on_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning on with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"
@@ -151,7 +153,7 @@ async def test_turn_on_enum(
 async def test_turn_off(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off."""
     entity_id = "switch.fake_brand_homeappliance_switch"
@@ -176,7 +178,7 @@ async def test_turn_off(
 async def test_turn_off_enum(
     hass: HomeAssistant,
     mock_appliance: MockAppliance,
-    patch_entity_description: None,  # noqa: ARG001
+    patch_entity_description: None,
 ) -> None:
     """Test turning off with enum."""
     entity_id = "switch.fake_brand_homeappliance_switch_enum"
@@ -235,3 +237,58 @@ async def test_is_on_not_forced_when_not_expected_offline() -> None:
     entity = HCSwitch(entity_description, runtime_data)
 
     assert entity.is_on is None
+
+
+async def test_available_and_readonly_when_option_locked(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    Test a switch backed by a read-locked Option stays available with its value.
+
+    Confirmed live on fork issue #59: Home Connect locks some Options (e.g.
+    iDos1) to read-only while a program runs rather than making them
+    unavailable - the entity should keep showing its current state and flag
+    itself as readonly, not disappear. `readonly` is always present (as
+    False) on an Option-backed entity, not just when it's actually locked -
+    per feedback on #59, a custom card/template shouldn't have to treat a
+    missing attribute as meaning "not readonly".
+    """
+    entity_id = "switch.fake_brand_homeappliance_switch_option"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.Option1"].update({"value": True, "access": "readwrite"})
+    await hass.async_block_till_done()
+
+    state = hass.states.get(entity_id)
+    assert state.state == STATE_ON
+    assert state.attributes["readonly"] is False
+
+    await mock_appliance.entities["Test.Option1"].update({"access": "read"})
+    await hass.async_block_till_done()
+
+    state = hass.states.get(entity_id)
+    assert state.state == STATE_ON
+    assert state.attributes["readonly"] is True
+
+
+async def test_turn_on_raises_when_option_locked(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """Test turning on raises a clear error instead of a silent/opaque failure."""
+    entity_id = "switch.fake_brand_homeappliance_switch_option"
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.Option1"].update({"value": False, "access": "read"})
+    await hass.async_block_till_done()
+
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            SWITCH_DOMAIN,
+            SERVICE_TURN_ON,
+            {ATTR_ENTITY_ID: entity_id},
+            blocking=True,
+        )
+
+    mock_appliance.session.send_sync.assert_not_awaited()

@@ -18,10 +18,10 @@ from home_disconnect import (
     HomeAppliance,
 )
 from homeassistant.const import CONF_DESCRIPTION, CONF_DEVICE_ID, CONF_HOST
-from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -82,12 +82,16 @@ LAUNDRY_RECONNECT_POLL_INTERVAL = timedelta(seconds=20)
 # expected state for these, not a fault: setup doesn't block on a successful
 # connection, and connect failures don't get escalated past debug-level
 # logging (see also upstream chris-mc1/homeconnect_local_hass issues #274 and
-# #293). Washer/dryer *combo* units are deliberately excluded here - the one
-# combo model checked (WNC254A0BY) stayed connected over Wi-Fi while powered
-# off instead, closer to the dishwasher pattern, so combos get the same
-# test-before-setup treatment as every other appliance type until there's
-# evidence a given combo actually needs the exemption too.
-EXPECTED_OFFLINE_APPLIANCE_TYPES = frozenset({"Washer", "Dryer"})
+# #293). Washer/dryer *combo* behavior isn't consistent across models - one
+# checked (WNC254A0BY) stayed connected over Wi-Fi while powered off, closer
+# to the dishwasher pattern, but upstream issue #426 confirms a different
+# combo (WDU28512) does drop off the network like a standalone unit. Included
+# here since the exemption is safe either way: an appliance that actually
+# stays connected essentially never triggers the lenient path, while one that
+# doesn't is spared a false setup error - the only real difference either way
+# is whether an occasional unreachable moment gets treated as expected or
+# escalated as a fault.
+EXPECTED_OFFLINE_APPLIANCE_TYPES = frozenset({"Washer", "Dryer", "WasherDryer"})
 
 
 class HomeConnectCoordinator(DataUpdateCoordinator[None]):
@@ -154,20 +158,35 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         """
         Whether being disconnected right now is expected, not a fault.
 
-        True for appliance types confirmed to legitimately cut their own WiFi
-        (EXPECTED_OFFLINE_APPLIANCE_TYPES), unless the *most recent* close
-        code is positively known to be something other than a clean code-1000
-        closure. No close code observed yet at all (None) also counts as
-        expected here, not just 1000 - a fresh HA restart rebuilds the
-        session from scratch, wiping last_close_code back to None before this
-        process has ever connected, which otherwise made every entity show
-        Unavailable on restart whenever the appliance simply happened to be
-        off (confirmed live on fork issue #7). These appliance types are
-        already treated as "unreachable is normal" everywhere else (no setup
-        blocking, debug-only connect-failure logging), so a restart
-        shouldn't be the one place that starts them out looking broken.
+        True only while actually disconnected, for appliance types confirmed
+        to legitimately cut their own WiFi (EXPECTED_OFFLINE_APPLIANCE_TYPES),
+        unless the *most recent* close code is positively known to be
+        something other than a clean code-1000 closure. No close code
+        observed yet at all (None) also counts as expected here, not just
+        1000 - a fresh HA restart rebuilds the session from scratch, wiping
+        last_close_code back to None before this process has ever connected,
+        which otherwise made every entity show Unavailable on restart
+        whenever the appliance simply happened to be off (confirmed live on
+        fork issue #7). These appliance types are already treated as
+        "unreachable is normal" everywhere else (no setup blocking,
+        debug-only connect-failure logging), so a restart shouldn't be the
+        one place that starts them out looking broken.
+
+        The explicit `not session.connected` check matters: home_disconnect
+        resets last_close_code back to None the moment a new connection
+        succeeds (so a stale code from a past disconnect doesn't linger), but
+        that means last_close_code alone can't distinguish "actually
+        offline, and it's expected" from "fully connected right now" - both
+        show up as None. Without this check, force_off_when_expected_offline/
+        force_option_when_expected_offline/clear_on_expected_offline (switch,
+        select, sensor, number) would force their placeholder value
+        constantly, even while connected and receiving live updates -
+        confirmed live on fork issue #21 (Power switch/PowerState sensor
+        stuck at Off on an always-online washer).
         """
         if self._escalate_connectivity_logging:
+            return False
+        if self.appliance.session.connected:
             return False
         return self.appliance.session.last_close_code in {None, 1000}
 
@@ -232,7 +251,20 @@ class HomeConnectCoordinator(DataUpdateCoordinator[None]):
         if last_err is not None:
             msg += f" ({type(last_err).__name__}: {last_err})"
         msg += f" - see {TROUBLESHOOTING_URL} if this doesn't resolve on its own"
-        raise ConfigEntryNotReady(msg) from last_err
+        # UpdateFailed, not ConfigEntryNotReady: HA's own
+        # async_config_entry_first_refresh() already converts a failed setup
+        # into ConfigEntryNotReady for us. Raising ConfigEntryNotReady
+        # ourselves from inside _async_setup doesn't get treated as an
+        # expected setup failure by __wrap_async_setup (it isn't a
+        # ConfigEntryError subclass) - it falls into the generic except
+        # Exception branch instead, which logs a full ERROR-level traceback
+        # via "Unexpected error fetching %s data" on *every single retry*
+        # while the appliance stays unreachable, before HA discards it and
+        # raises its own ConfigEntryNotReady anyway. Confirmed live on fork
+        # issue #30 (an oven unreachable for an extended period produced
+        # dozens of these). UpdateFailed is handled quietly and still ends
+        # up as ConfigEntryNotReady with this as __cause__.
+        raise UpdateFailed(msg) from last_err
 
     async def _connect(self) -> None:
         self.logger.debug(

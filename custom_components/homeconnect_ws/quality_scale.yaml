@@ -27,16 +27,16 @@ rules:
   test-before-setup:
     status: done
     comment: |
-      Type-based split: standalone washers and dryers (EXPECTED_OFFLINE_APPLIANCE_TYPES
-      in coordinator.py) keep the old non-blocking setup - connect() runs in a
-      background task and setup always succeeds, since these appliances
-      routinely cut their own WiFi radio entirely when powered off between
-      cycles (confirmed via fork issue #7: a clean WebSocket close code 1000
-      followed by dropping off the LAN entirely). Every other appliance type,
-      including washer/dryer combos, now blocks setup on a single connect
-      attempt and raises ConfigEntryNotReady on failure, letting HA's normal
-      retry-with-backoff take over - matching how most other integrations
-      behave.
+      Type-based split: washers, dryers, and washer/dryer combos
+      (EXPECTED_OFFLINE_APPLIANCE_TYPES in coordinator.py) keep the old
+      non-blocking setup - connect() runs in a background task and setup
+      always succeeds, since these appliances routinely cut their own WiFi
+      radio entirely when powered off between cycles (confirmed via fork
+      issue #7: a clean WebSocket close code 1000 followed by dropping off
+      the LAN entirely). Every other appliance type blocks setup on a single
+      connect attempt and raises ConfigEntryNotReady on failure, letting HA's
+      normal retry-with-backoff take over - matching how most other
+      integrations behave.
 
       This reverses an earlier decision (see the design history for issues
       #274/#293) that rejected a type-based split as guesswork for appliance
@@ -45,12 +45,20 @@ rules:
       precedent for the same "sleepy device" problem. What changed: issue #7
       turned "washers/dryers might disconnect their WiFi" from a guess into a
       confirmed fact (WiFi radio shutdown, not just the local API closing),
-      specifically for washers and dryers - not for the appliance categories
-      the earlier reasoning was actually worried about, and not even for
-      washer/dryer combos, at least one of which (a Bosch WNC254A0BY) stays
+      for at least some washers, dryers, and combos - not for the appliance
+      categories the earlier reasoning was actually worried about. Evidence
+      shows this varies by model within the washer/dryer/combo group itself,
+      not just for combos: one combo checked (a Bosch WNC254A0BY) stays
       connected over Wi-Fi while powered off, closer to the dishwasher
-      pattern. The exemption is scoped to exactly what's confirmed, not
-      widened back into a guess.
+      pattern, while upstream chris-mc1/homeconnect_local_hass issue #426
+      confirms another combo (a WDU28512) does drop offline like a standalone
+      unit is expected to - and a standalone washer (a Bosch WGB256ABSN,
+      fork issue #21) has also been confirmed to stay connected while
+      powered off, the same as the WNC254A0BY combo. Including the whole
+      washer/dryer/combo group here is still scoped to confirmed evidence,
+      not a guess - it's just evidence that behavior varies by model across
+      the whole group rather than evidence any of them never need it, and the
+      exemption is harmless for a model that happens to stay connected.
   unique-config-entry: done
 
   # Silver
@@ -109,9 +117,14 @@ rules:
       quality_scale.yaml: some numeric-range icon logic isn't expressible
       with icons.json's state/range selectors alone.
   reconfiguration-flow:
-    status: exempt
+    status: done
     comment: |
-      No need for reconfiguration flow.
+      Two independent options, since they address unrelated problems: change
+      connection (switch between automatic mDNS discovery and a fixed
+      IP-Address - needed if mDNS isn't reachable on a given network, or to
+      pin/un-pin an Appliance's address) and update profile file (re-upload
+      a profile to pick up new Options/Settings a firmware update added, or
+      a new encryption key after the Appliance was unpaired and re-paired).
   repair-issues:
     status: exempt
     comment: |

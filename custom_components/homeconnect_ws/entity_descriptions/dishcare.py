@@ -282,6 +282,7 @@ DISHCARE_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity="Dishcare.Dishwasher.Status.ProgramPhase",
             device_class=SensorDeviceClass.ENUM,
             has_state_translation=True,
+            force_value_when_no_active_program="none",
         ),
         HCSensorEntityDescription(
             key="sensor_machine_care_reminder",
@@ -330,6 +331,12 @@ DISHCARE_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity_category=EntityCategory.CONFIG,
             entity_registry_enabled_default=False,
         ),
+        # Also referred to as "EfficientDry"
+        HCSwitchEntityDescription(
+            key="switch_eco_dry_option",
+            entity="Dishcare.Dishwasher.Option.EcoDry",
+            device_class=SwitchDeviceClass.SWITCH,
+        ),
         HCSwitchEntityDescription(
             key="switch_extra_dry",
             entity="Dishcare.Dishwasher.Setting.ExtraDry",
@@ -374,6 +381,11 @@ DISHCARE_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             value_mapping=("On", "Off"),
             entity_category=EntityCategory.CONFIG,
             entity_registry_enabled_default=False,
+        ),
+        HCSwitchEntityDescription(
+            key="switch_pretreatment",
+            entity="Dishcare.Dishwasher.Option.Pretreatment",
+            device_class=SwitchDeviceClass.SWITCH,
         ),
     ],
 }

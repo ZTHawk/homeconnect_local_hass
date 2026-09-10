@@ -25,7 +25,7 @@ from home_disconnect.entities import (
     OptionDescription,
 )
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import CONF_DESCRIPTION, CONF_DEVICE_ID, CONF_HOST, CONF_NAME
+from homeassistant.const import CONF_DESCRIPTION, CONF_DEVICE_ID, CONF_HOST, CONF_MODE, CONF_NAME
 
 MOCK_APPLIANCE_INFO = {
     "brand": "Fake_Brand",
@@ -37,6 +37,7 @@ MOCK_APPLIANCE_INFO = {
     "swVersion": "3.3",
     "mac": "78-43-F2-23-C8-D7",
     "serialNumber": "Fake_serialNumber",
+    "model": "Fake_vib",
 }
 
 MOCK_TLS_DEVICE_ID = "010203040506070809"
@@ -44,6 +45,7 @@ MOCK_TLS_DEVICE_ID_2 = "102030405060708090"
 MOCK_TLS_DEVICE_DESCRIPTION = {"info": {}, "MOCK_TLS_DEVICE_DESCRIPTION": None}
 MOCK_TLS_DEVICE_INFO = {
     "haId": MOCK_TLS_DEVICE_ID,
+    "deviceID": MOCK_TLS_DEVICE_ID,
     "type": "Test_TLS",
     "serialNumber": MOCK_TLS_DEVICE_ID,
     "brand": "Test_Brand",
@@ -61,6 +63,7 @@ MOCK_AES_DEVICE_ID = "101112131415161718"
 MOCK_AES_DEVICE_DESCRIPTION = {"info": {}, "MOCK_AES_DEVICE_DESCRIPTION": None}
 MOCK_AES_DEVICE_INFO = {
     "haId": MOCK_AES_DEVICE_ID,
+    "deviceID": MOCK_AES_DEVICE_ID,
     "type": "Test_AES",
     "serialNumber": MOCK_AES_DEVICE_ID,
     "brand": "Test_Brand",
@@ -172,6 +175,12 @@ ENTITY_DESCRIPTIONS: _EntityDescriptionsType = {
             entity="Test.Switch.Enum",
             value_mapping=("On", "Off"),
         ),
+        # Backed by an actual Option (unlike the two above, which are
+        # Settings) - needed to exercise the locked-read-only behavior,
+        # which only applies to Options.
+        HCSwitchEntityDescription(
+            key="Test.Switch.Option", name="Switch.Option", entity="Test.Option1"
+        ),
     ],
     "fan": [
         HCFanEntityDescription(
@@ -249,6 +258,12 @@ DEVICE_DESCRIPTION = DeviceDescription(
         EntityDescription(
             uid=105,
             name="Test.RegEx.002.Sensor",
+            available=True,
+            access=Access.READ,
+        ),
+        EntityDescription(
+            uid=106,
+            name="BSH.Common.Status.RemoteControlStartAllowed",
             available=True,
             access=Access.READ,
         ),
@@ -458,6 +473,15 @@ DEVICE_DESCRIPTION = DeviceDescription(
             execution=Execution.START_ONLY,
         ),
         EntityDescription(
+            uid=506,
+            name="Test.Program.Program4",
+            options=[
+                OptionDescription(access=Access.READ_WRITE, available=True, refUID=401),
+                OptionDescription(access=Access.READ_WRITE, available=True, refUID=402),
+            ],
+            execution=Execution.SELECT_ONLY,
+        ),
+        EntityDescription(
             uid=502,
             name="BSH.Common.Program.Favorite.001",
             available=True,
@@ -504,6 +528,7 @@ DEVICE_DESCRIPTION = DeviceDescription(
 MOCK_CONFIG_DATA = {
     CONF_DESCRIPTION: DEVICE_DESCRIPTION,
     CONF_HOST: "1.2.3.4",
+    CONF_MODE: "AES",
     CONF_PSK: "PSK_KEY",
     CONF_AES_IV: "AES_IV",
     CONF_DEVICE_ID: "Test_Device_ID",

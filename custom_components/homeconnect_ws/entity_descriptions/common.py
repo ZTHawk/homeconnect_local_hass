@@ -56,9 +56,36 @@ POWER_OFF_STATE_NAMES = ("Off", "MainsOff")
 
 def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription | None:
     """Get Start Button description."""
+    # SELECT_ONLY needs this button just as much as SELECT_AND_START: selecting
+    # a program (writing SelectedProgram) only stages it and its options on
+    # these appliances, it doesn't start anything - a separate write to
+    # ActiveProgram is what actually starts it, and Program.start() already
+    # posts there unconditionally regardless of execution type. Confirmed
+    # live on fork issue #21 via the official cloud integration's own debug
+    # log: "PUT .../programs/active {'key': '<program>'}" is the literal
+    # start action, distinct from the earlier "PUT .../programs/selected"
+    # that only configured options.
+    #
+    # Permissive by default (exclude only confirmed START_ONLY), not
+    # restrictive: this generator runs once, synchronously, before the
+    # appliance connection is even attempted (get_available_entities() is
+    # called before coordinator.async_config_entry_first_refresh() - see
+    # __init__.py) - for laundry appliances, whose setup is deliberately
+    # non-blocking, that can mean *no* live data has arrived yet at all.
+    # program.execution then reads whatever the static profile export
+    # defaults to, which is frequently the placeholder "none" (confirmed on
+    # fork issue #21's own washer - every program in a real profile export
+    # showed execution="none", not the appliance's real value). Requiring a
+    # positive SELECT_AND_START/SELECT_ONLY match meant the button silently
+    # never got created for the rest of the session whenever this ran before
+    # the real value arrived. HCStartButton.available is a live property and
+    # correctly reflects the true execution type once data does arrive, so
+    # the only actual cost of over-including here is a harmless extra button
+    # on a genuinely START_ONLY appliance - far cheaper than a required
+    # button silently missing for the whole session.
     programs = list(
         filter(
-            lambda program: program.execution == Execution.SELECT_AND_START,
+            lambda program: program.execution != Execution.START_ONLY,
             appliance.programs.values(),
         )
     )
@@ -66,6 +93,14 @@ def generate_start_button(appliance: HomeAppliance) -> HCButtonEntityDescription
         return HCButtonEntityDescription(
             key="button_start_program",
             entity="BSH.Common.Root.ActiveProgram",
+            # HCStartButton.available reads appliance.selected_program, which
+            # resolves through SelectedProgram, not ActiveProgram - without
+            # this, the button only re-renders when ActiveProgram itself
+            # changes, so live power-on/off toggling (which updates
+            # SelectedProgram) can leave the displayed availability a step
+            # stale until something else happens to touch ActiveProgram.
+            # Confirmed live on fork issue #54.
+            entities=["BSH.Common.Root.SelectedProgram"],
         )
     return None
 
@@ -74,8 +109,6 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
     """Get Power switch description."""
     entity_descriptions = EntityDescriptions()
     if entity := appliance.entities.get("BSH.Common.Setting.PowerState"):
-        # Hood power toggles return 400 while venting; fan entity controls the hood.
-        skip_switch = "Cooking.Common.Program.Hood.Venting" in appliance.programs
         entity_min = getattr(entity, "min", None)
         entity_max = getattr(entity, "max", None)
         if entity_min is not None and entity_max is not None:
@@ -87,7 +120,7 @@ def generate_power_switch(appliance: HomeAppliance) -> EntityDescriptions:
         else:
             settable_states = set((entity.enum or {}).values())
 
-        if len(settable_states) == 2 and not skip_switch:
+        if len(settable_states) == 2:
             # only two power states
             for mapping in POWER_SWITCH_VALUE_MAPINGS:
                 if settable_states == set(mapping):
@@ -315,7 +348,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_remote_start_allowed",
             entity="BSH.Common.Status.RemoteControlStartAllowed",
-            entity_registry_enabled_default=False,
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
         HCBinarySensorEntityDescription(
@@ -369,7 +401,6 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             key="select_remote_control_level",
             entity="BSH.Common.Setting.RemoteControlLevel",
             entity_category=EntityCategory.CONFIG,
-            entity_registry_enabled_default=False,
             has_state_translation=True,
         ),
         # cleanup: duplicate select_remote_control_level entry removed
@@ -410,6 +441,7 @@ COMMON_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity="BSH.Common.Option.ProgramProgress",
             native_unit_of_measurement=PERCENTAGE,
             clear_on_expected_offline=True,
+            unavailable_when_no_active_program=True,
         ),
         HCSensorEntityDescription(
             key="sensor_water_forecast",

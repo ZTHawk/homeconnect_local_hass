@@ -21,9 +21,9 @@
   ],
   "quality_scale": "platinum",
   "requirements": [
-    "home-disconnect==1.6.0b1"
+    "home-disconnect==1.7.0b0"
   ],
-  "version": "1.7.0b6",
+  "version": "1.7.0",
   "zeroconf": [
     "_homeconnect._tcp.local."
   ]

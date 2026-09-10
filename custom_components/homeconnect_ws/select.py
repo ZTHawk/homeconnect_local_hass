@@ -8,11 +8,18 @@ from home_disconnect.entities import Access, Execution
 from homeassistant.components.select import SelectEntity
 
 from .entity import HCEntity
-from .helpers import create_entities, entity_is_available, error_decorator
+from .helpers import (
+    build_full_option_set,
+    create_entities,
+    ensure_writable,
+    entity_is_available,
+    error_decorator,
+    needs_full_option_set,
+)
 
 if TYPE_CHECKING:
     from home_disconnect.entities import Entity as HcEntity
-    from home_disconnect.entities import SelectedProgram
+    from home_disconnect.entities import Program, SelectedProgram
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -94,6 +101,13 @@ class HCSelect(HCEntity, SelectEntity):
         if (
             self.entity_description.force_option_when_expected_offline is not None
             and self._runtime_data.coordinator.expected_offline
+            # A static entity description can't know every appliance model's
+            # actual enum in advance - only force to a value this appliance
+            # genuinely has, or SelectEntity.state silently degrades to
+            # "Unknown" for models missing it (confirmed live on fork issue
+            # #7 for the dynamically-generated PowerState case; this guards
+            # the same failure mode for statically-declared descriptions).
+            and self.entity_description.force_option_when_expected_offline in self.options
         ):
             return self.entity_description.force_option_when_expected_offline
         if self._entity is None:
@@ -111,6 +125,7 @@ class HCSelect(HCEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         if self._entity is None:
             return
+        ensure_writable(self._entity)
         if self._rev_options:
             option = self._rev_options[option]
         await self._entity.set_value(option)
@@ -182,7 +197,15 @@ class HCProgram(HCSelect):
     @error_decorator
     async def async_select_option(self, option: str) -> None:
         selected_program = self._runtime_data.appliance.programs[self._rev_programs[option]]
-        if selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
+        if needs_full_option_set(selected_program):
+            # This appliance validates a program write against the program's
+            # complete option set and rejects anything less with a 400, so
+            # neither of the branches below can apply to it (confirmed live on
+            # a Bosch HNG6764B6 oven, where every single one of its programs
+            # failed to select). Scoped to appliances that actually say so in
+            # their device description - see _needs_full_option_set.
+            await self._select_with_full_option_set(selected_program)
+        elif selected_program.execution in (Execution.SELECT_ONLY, Execution.SELECT_AND_START):
             # override_options=True (send no options) rather than merging in
             # each option's current shared value: a single option UID can have
             # a different valid range depending on which program last set it
@@ -195,6 +218,25 @@ class HCProgram(HCSelect):
             # start()'s START_ONLY path (see issue #14) actually needs the
             # opposite - some options there have no safe appliance-side
             # default at all - so this doesn't touch that branch.
+            #
+            # Only this branch and _select_with_full_option_set's SELECT_ONLY
+            # branch actually write to SelectedProgram itself - the START_ONLY
+            # branch below writes ActiveProgram instead, so SelectedProgram
+            # being permanently read-only-by-design on those appliances (see
+            # generate_start_button) must not block it.
+            ensure_writable(self._entity)
             await selected_program.select(override_options=True)
         elif selected_program.execution == Execution.START_ONLY:
             await selected_program.start()
+
+    async def _select_with_full_option_set(self, program: Program) -> None:
+        """Write program and options together, for appliances that demand both."""
+        options = build_full_option_set(self._runtime_data.appliance, program)
+        if program.execution == Execution.SELECT_ONLY:
+            ensure_writable(self._entity)
+            await program.select(options, override_options=True)
+        else:
+            # SELECT_AND_START and START_ONLY both go to /ro/activeProgram: an
+            # appliance that combines selecting and starting into a single
+            # operation rejects a bare POST to /ro/selectedProgram with a 400.
+            await program.start(options, override_options=True)

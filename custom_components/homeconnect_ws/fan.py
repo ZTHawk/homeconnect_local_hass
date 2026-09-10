@@ -12,7 +12,14 @@ from homeassistant.util.percentage import percentage_to_ranged_value, ranged_val
 
 from .const import DOMAIN
 from .entity import HCEntity
-from .helpers import create_entities, entity_is_available, error_decorator
+from .entity_descriptions.common import POWER_OFF_STATE_NAMES
+from .helpers import (
+    build_full_option_set,
+    create_entities,
+    entity_is_available,
+    error_decorator,
+    needs_full_option_set,
+)
 
 if TYPE_CHECKING:
     from home_disconnect.entities import Entity as HcEntity
@@ -44,9 +51,13 @@ async def async_setup_entry(
     async_add_entites(entities)
 
 
+_POWER_STATE_ENTITY = "BSH.Common.Setting.PowerState"
+_OPERATION_STATE_ENTITY = "BSH.Common.Status.OperationState"
+_INACTIVE_OPERATION_STATES = frozenset({"inactive", "ready"})
+
 _HOOD_FAN_STATE_ENTITIES = (
     "BSH.Common.Root.ActiveProgram",
-    "BSH.Common.Status.OperationState",
+    _OPERATION_STATE_ENTITY,
 )
 
 
@@ -104,7 +115,17 @@ class HCFan(HCEntity, FanEntity):
 
     @property
     def is_on(self) -> bool:
-        if self._runtime_data.appliance.active_program is None:
+        appliance = self._runtime_data.appliance
+        # Some hoods keep reporting an active Venting program with a non-zero
+        # venting level after being switched off. OperationState is the
+        # authoritative signal in that case.
+        operation_state = appliance.entities.get(_OPERATION_STATE_ENTITY)
+        if (
+            operation_state is not None
+            and str(operation_state.value or "").lower() in _INACTIVE_OPERATION_STATES
+        ):
+            return False
+        if appliance.active_program is None:
             return False
         return any(entity.value_raw not in (None, 0) for entity in self._speed_entities.values())
 
@@ -192,7 +213,17 @@ class HCFan(HCEntity, FanEntity):
         **kwargs: Any,
     ) -> None:
         if percentage is None:
-            await self._venting_program().start(options={}, override_options=True)
+            program = self._venting_program()
+            # Same 400 BadRequest as the start button / program select: an
+            # appliance whose ActiveProgram is flagged fullOptionSet validates
+            # a program write against the program's complete option set and
+            # rejects an empty one. Confirmed live on a Bosch hood.
+            options = (
+                build_full_option_set(self._runtime_data.appliance, program)
+                if needs_full_option_set(program)
+                else {}
+            )
+            await program.start(options, override_options=True)
         else:
             await self.async_set_percentage(int(percentage))
         self.async_write_ha_state()
@@ -203,9 +234,43 @@ class HCFan(HCEntity, FanEntity):
         if appliance.active_program is None:
             return
 
-        options = self._speed_options(appliance.active_program, value=0)
-        if not options:
-            return
+        # A hood has no way to abort a running program: it exposes no
+        # AbortProgram command and its programs are all START_ONLY. Both
+        # other candidates are dead ends, confirmed live on a DWK81AN60 by
+        # reading the WebSocket debug log:
+        #   - DELETE /ro/activeProgram is never answered at all, so send_sync
+        #     waits for a response that cannot come and raises TimeoutError
+        #     (upstream issue #386 describes it working on other appliance
+        #     classes, so this stays appliance-specific).
+        #   - re-POSTing the venting program with VentingLevel=FanOff gets a
+        #     bare RESPONSE and is then silently dropped: no value notify
+        #     follows and the fan keeps spinning at its previous stage
+        #     (fork issue #17).
+        # Powering the appliance off is the only stop it honours, and it is
+        # the exact counterpart of starting a program, which the hood answers
+        # by switching PowerState to On by itself.
+        power_state = appliance.entities.get(_POWER_STATE_ENTITY)
+        off_value = None
+        if power_state is not None:
+            entity_min = getattr(power_state, "min", None)
+            entity_max = getattr(power_state, "max", None)
+            if entity_min is not None and entity_max is not None:
+                # Some appliances declare a wider enum than they actually
+                # allow writing - matches generate_power_switch's own
+                # settable-range check for this same entity.
+                settable = {
+                    value
+                    for key, value in (power_state.enum or {}).items()
+                    if entity_min <= int(key) <= entity_max
+                }
+            else:
+                settable = set((power_state.enum or {}).values())
+            off_value = next((n for n in POWER_OFF_STATE_NAMES if n in settable), None)
+        if power_state is None or off_value is None:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="no_power_off",
+            )
 
-        await appliance.active_program.start(options)
+        await power_state.set_value(off_value)
         self.async_write_ha_state()
